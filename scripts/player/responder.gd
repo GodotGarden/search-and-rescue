@@ -113,7 +113,7 @@ func set_display_name(display_name: String) -> void:
 
 
 func _update_name_tag() -> void:
-	name_tag.text = "%s (You)" % _display_name if is_multiplayer_authority() else _display_name
+	name_tag.text = _display_name
 
 
 func _set_binoculars_active(active: bool) -> void:

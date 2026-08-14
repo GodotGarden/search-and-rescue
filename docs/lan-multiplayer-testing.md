@@ -39,7 +39,7 @@ Perform this sequence once per build that changes session, player, world, or sha
 | Connection | Host, then join with the correct LAN IP. | The client enters the same inland-island level. Neither instance stays on a connecting screen. |
 | Spawn roster | Stand still after the client joins. | Exactly two responders exist, at separate spawn markers. Rejoining or changing focus does not create another responder. |
 | Local ownership | Move, sprint, jump, and orbit the camera on each machine. | Each player controls only their own responder and camera. The other responder remains input-free locally. |
-| Names | Compare the labels above both responders. | Each machine shows its own name with “(You)” and the other player's chosen name. |
+| Names | Compare the labels above both responders. | Each machine shows both players' distinct chosen names. |
 | Replication | Have each player run from the rescue centre toward the trail destination, then stop and change direction. | The other instance sees responsive movement without a permanently frozen or duplicate responder. |
 | World consistency | Compare landmarks and objective text. | Both players see the same inland-island blockout and the objective “Reach the trail marker.” |
 | Toolbelt controls | Press <kbd>1</kbd>, <kbd>2</kbd>, and <kbd>3</kbd>, then use <kbd>E</kbd>. | The matching hotbar slot highlights; binoculars zoom while <kbd>E</kbd> is held, while map and compass open on a press. |
