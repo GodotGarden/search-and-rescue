@@ -1,0 +1,4 @@
+interface:
+  display_name: "Procedural Environment"
+  short_description: "Build scalable natural world systems"
+  default_prompt: "Use $procedural-environment to implement this procedural environment task."

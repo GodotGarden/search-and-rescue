@@ -1,0 +1,4 @@
+interface:
+  display_name: "Simulation & Physics"
+  short_description: "Build stable physics and motion systems"
+  default_prompt: "Use $simulation-physics to implement this simulation or physics task."
