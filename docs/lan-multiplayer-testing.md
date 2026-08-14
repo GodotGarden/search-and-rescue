@@ -10,11 +10,23 @@ Use this guide to verify the current walking-demo scaffold with one host and one
 - Allow inbound UDP traffic on port `8910` on the host machine if its firewall asks. The port is defined as `DEFAULT_PORT` in `scripts/multiplayer/session.gd`.
 - For a same-machine check, use `127.0.0.1` as the joining address. Do not treat this as a substitute for a LAN test.
 
+## Find the host's LAN address on macOS
+
+On the host Mac, open **System Settings → Network**, select the connected Wi-Fi or Ethernet service, then open **Details…**. The address listed under **IP Address** is the value to enter on the joining machine—for example, `192.168.1.42`.
+
+As a terminal shortcut for a typical Wi-Fi connection, run:
+
+```sh
+ipconfig getifaddr en0
+```
+
+Use the returned IPv4 address. Do not use an address beginning with `127.` (loopback), a public internet address, or the router's address. If the Mac is connected by Ethernet and `en0` prints nothing, use the address shown in System Settings for that Ethernet service instead.
+
 ## Start a session
 
 1. Open the project and run it with <kbd>F5</kbd> on the host machine.
 2. Select **Host LAN session**. The inland island loads and the HUD shows **Host**.
-3. Find the host machine's LAN IP address, such as `192.168.1.42`.
+3. Find the host machine's LAN IP address, such as `192.168.1.42`; on macOS, follow the steps above.
 4. Run a second instance on the joining machine. Enter that IP address in **Host IP address**, then select **Join session**.
 5. Wait for the inland island to load on the client. Each machine should show two responders: the local responder is blue and the remote responder is orange.
 
