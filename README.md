@@ -22,12 +22,17 @@ See [specification.md](specification.md) for the product scope and [roadmap.md](
 
 1. Install the standard Godot Engine **4.6** editor and Git.
 2. Create or open the Godot project in this repository.
-3. Open `project.godot`, then set the main scene when the first playable scene is added.
-4. Run the project with <kbd>F6</kbd> for the current scene or <kbd>F5</kbd> for the game.
+3. Open `project.godot` and run the game with <kbd>F5</kbd>.
 
 Use Forward+ in Project Settings for the intended desktop look. Develop and test on machines with current graphics hardware that supports Godot's RenderingDevice-based renderers.
 
-At the first scaffold checkpoint, this should be enough to open a simple island test scene and control a third-person responder.
+## Current scaffold demo
+
+The current main scene is a two-player LAN third-person walking demo. On the first machine, select **Host LAN session**. On the second machine, enter the host machine's LAN IP address and select **Join session**. Both machines use UDP port `8910`; allow it through the host firewall if needed.
+
+Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The mouse controls the orbit camera. <kbd>Escape</kbd> releases/captures the mouse; use the on-screen **End session** control to return the host—and connected client—to the session menu.
+
+For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
 
 ## Documentation map
 
