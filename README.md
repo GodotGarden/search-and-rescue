@@ -34,7 +34,7 @@ The current main scene is a two-player LAN third-person walking demo. On the fir
 
 Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The mouse controls the orbit camera. <kbd>Escape</kbd> releases/captures the mouse; use the on-screen **End session** control to return the host—and connected client—to the session menu.
 
-Each responder currently carries a visual toolbelt with binoculars, a map pouch, and a magnetic compass. The compass needle remains aligned to world north as the responder turns. These are placeholder kit props only; selecting, using, and choosing equipment begins at the later loadout milestone.
+Each responder carries a lightweight navigation toolbelt: hold <kbd>B</kbd> to look through binoculars, press <kbd>M</kbd> to open the inland-island map, and press <kbd>C</kbd> to inspect the magnetic compass. The map shows the current blockout, your position, the rescue centre, and the trail destination. These fixed tools are not yet part of an inventory or loadout system.
 
 For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
 

@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/ui/prototype_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scenes/ui/map_display.gd" id="2_map"]
+[ext_resource type="Script" path="res://scenes/ui/compass_display.gd" id="3_compass"]
 
 [node name="PrototypeHud" type="Control"]
 layout_mode = 3
@@ -48,3 +50,100 @@ offset_right = 192.0
 offset_bottom = 206.0
 mouse_filter = 0
 text = "End session"
+
+[node name="BinocularsLabel" type="Label" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 24.0
+offset_bottom = 52.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "BINOCULARS — release B to return"
+horizontal_alignment = 1
+visible = false
+
+[node name="MapOverlay" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="Panel" type="PanelContainer" parent="MapOverlay"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MapOverlay/Panel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Rows" type="VBoxContainer" parent="MapOverlay/Panel/Margin"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="MapOverlay/Panel/Margin/Rows"]
+theme_override_font_sizes/font_size = 24
+text = "INLAND ISLAND FIELD MAP"
+horizontal_alignment = 1
+
+[node name="MapDisplay" type="Control" parent="MapOverlay/Panel/Margin/Rows"]
+custom_minimum_size = Vector2(0, 385)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("2_map")
+
+[node name="Hint" type="Label" parent="MapOverlay/Panel/Margin/Rows"]
+text = "M — close map     White arrow — your position     Yellow — trail destination"
+horizontal_alignment = 1
+
+[node name="CompassOverlay" type="PanelContainer" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -145.0
+offset_top = -170.0
+offset_right = 145.0
+offset_bottom = 170.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="Margin" type="MarginContainer" parent="CompassOverlay"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Rows" type="VBoxContainer" parent="CompassOverlay/Margin"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="CompassOverlay/Margin/Rows"]
+theme_override_font_sizes/font_size = 22
+text = "MAGNETIC COMPASS"
+horizontal_alignment = 1
+
+[node name="CompassDisplay" type="Control" parent="CompassOverlay/Margin/Rows"]
+custom_minimum_size = Vector2(250, 250)
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_compass")
+
+[node name="Hint" type="Label" parent="CompassOverlay/Margin/Rows"]
+text = "C — close compass"
+horizontal_alignment = 1

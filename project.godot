@@ -65,6 +65,18 @@ toggle_mouse_capture={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":4194305)]
 }
+use_binoculars={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":66,"unicode":98)]
+}
+toggle_map={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":77,"unicode":109)]
+}
+toggle_compass={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":67,"unicode":99)]
+}
 
 [physics]
 

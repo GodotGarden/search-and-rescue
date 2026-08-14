@@ -20,6 +20,7 @@ var _look_pitch := -0.2
 var _network_position := Vector3.ZERO
 var _network_yaw := 0.0
 var _network_send_elapsed := 0.0
+var _binoculars_active := false
 
 
 func _ready() -> void:
@@ -42,6 +43,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_mouse_capture"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 		return
+	if event.is_action_pressed("use_binoculars"):
+		_binoculars_active = true
+		return
+	if event.is_action_released("use_binoculars"):
+		_binoculars_active = false
+		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		_look_pitch = clampf(_look_pitch - event.relative.y * mouse_sensitivity, -CAMERA_PITCH_LIMIT, CAMERA_PITCH_LIMIT)
@@ -55,6 +62,7 @@ func _physics_process(delta: float) -> void:
 		global_position = global_position.lerp(_network_position, minf(delta * 12.0, 1.0))
 		rotation.y = lerp_angle(rotation.y, _network_yaw, minf(delta * 12.0, 1.0))
 		return
+	camera.fov = move_toward(camera.fov, 28.0 if _binoculars_active else 70.0, delta * 160.0)
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 	if Input.is_action_just_pressed("jump") and is_on_floor():
@@ -70,6 +78,10 @@ func _physics_process(delta: float) -> void:
 	if _network_send_elapsed >= NETWORK_SEND_INTERVAL:
 		_network_send_elapsed = 0.0
 		_send_network_state()
+
+
+func is_viewing_binoculars() -> bool:
+	return _binoculars_active
 
 
 func _send_network_state() -> void:

@@ -60,6 +60,8 @@ func _spawn_responder(peer_id: int, spawn_index: int) -> void:
 	responder.set_multiplayer_authority(peer_id)
 	active_world.get_node("Players").add_child(responder)
 	responder.global_transform = active_world.get_spawn_transform(spawn_index)
+	if peer_id == multiplayer.get_unique_id():
+		hud.set_local_responder(responder)
 	_refresh_hud()
 
 
@@ -78,6 +80,7 @@ func _clear_active_level() -> void:
 	if active_world != null:
 		active_world.queue_free()
 		active_world = null
+	hud.set_local_responder(null)
 
 
 func _show_status(message: String) -> void:
