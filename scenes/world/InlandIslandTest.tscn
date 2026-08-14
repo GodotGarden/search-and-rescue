@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/inland_island_test.gd" id="1_world"]
+
+[node name="InlandIslandTest" type="Node3D"]
+script = ExtResource("1_world")
+
+[node name="SpawnHost" type="Marker3D" parent="."]
+position = Vector3(-20, 2, 24)
+
+[node name="SpawnClient" type="Marker3D" parent="."]
+position = Vector3(-15, 2, 24)
+
+[node name="TrailDestination" type="Marker3D" parent="."]
+position = Vector3(58, 2, -48)
+
+[node name="Players" type="Node3D" parent="."]
