@@ -1,6 +1,8 @@
 # Procedural Preview Lab
 
-**Status: proposed.** Formalizes and extends the dev harness at [scripts/dev/character_preview.gd](../../scripts/dev/character_preview.gd) into a reusable system for all procedural visuals, not just characters. Nothing here changes [procedural-character-spec.md](../procedural-character-spec.md)'s rig/locomotion architecture; the "character animation contract" section below refactors *how* locomotion is driven for preview purposes, not the walk-cycle math itself.
+**Status: build order step 1 implemented.** Formalizes and extends the dev harness at [scripts/dev/character_preview.gd](../../scripts/dev/character_preview.gd) into a reusable system for all procedural visuals, not just characters. Nothing here changes [procedural-character-spec.md](../procedural-character-spec.md)'s rig/locomotion architecture; the "character animation contract" section below refactors *how* locomotion is driven for preview purposes, not the walk-cycle math itself.
+
+[Build order](#build-order) step 1 (stabilize the existing batch harness) is done: [procedural_locomotion.gd](../../scripts/character/procedural_locomotion.gd) exposes a pure `apply_pose()`/`set_exact_pose()` evaluator, [character_preview.gd](../../scripts/dev/character_preview.gd) supports deterministic pose capture, fit-to-subject camera views, the `neutral_review`/`silhouette`/`gameplay_camera` stage presets, a ground grid, and a batch mode driven by named [PreviewCase](../../scripts/dev/preview_case.gd) resources (see [resources/preview_cases/](../../resources/preview_cases/) for examples) that write a PNG + JSON metadata sidecar per case. Steps 2-5 (interactive lab UI, subject-adapter extraction, tree adapter) are not started. See `AGENTS.md`'s Commands section for copy-pasteable invocations.
 
 ## Purpose
 
@@ -75,13 +77,13 @@ Each capture writes a PNG plus small JSON metadata containing the payload, gener
 
 ## Character animation contract
 
-The preview must be able to request an exact pose. Do not rely on "wait eight frames and capture whatever phase happened" — the mechanism `character_preview.gd`'s `capture_delay_frames` currently uses.
+The preview must be able to request an exact pose, not rely on "wait eight frames and capture whatever phase happened."
 
-Refactor locomotion around a pure pose evaluator:
+Locomotion is built around a pure pose evaluator (done — see [procedural_locomotion.gd](../../scripts/character/procedural_locomotion.gd)):
 
-- Gameplay owns phase accumulation from travelled distance.
-- The evaluator applies a supplied phase, speed, and grounded state to the rig.
-- The preview supplies phase directly with a scrubber or fixed capture value.
+- Gameplay owns phase accumulation from travelled distance (`ProceduralLocomotion.update()`, unchanged).
+- `ProceduralLocomotion.apply_pose(gait_phase, speed, idle_phase, airborne_blend)` is the pure evaluator: it poses every joint from an explicit state and touches no internal accumulators. `update()` calls it after advancing phase by delta time; nothing else changed about runtime gameplay animation.
+- `ProceduralLocomotion.set_exact_pose(gait_phase, speed, grounded, idle_phase)` (also exposed as `CharacterModel.set_exact_pose()`, taking a normalized 0..1 phase) lets the preview supply phase directly, with no blend ramp — the same call the batch `PreviewCase` runner uses.
 
 This makes contact-pose comparisons, screenshots, and visual regressions reproducible while preserving the existing runtime animation behavior described in [Key decision: procedural sine-driven locomotion](../procedural-character-spec.md#key-decision-procedural-sine-driven-locomotion-not-keyframes).
 
@@ -122,22 +124,22 @@ Keep rendering settings fixed for capture cases. Avoid random seeds, real-time c
 
 ## Immediate improvements to the current harness
 
-These apply to [scripts/dev/character_preview.gd](../../scripts/dev/character_preview.gd) before any broader refactor:
+Applied to [scripts/dev/character_preview.gd](../../scripts/dev/character_preview.gd) as build order step 1 — all done:
 
-- Set `model.appearance` before adding the model to the scene tree, then let `CharacterModel._ready()` build it once. The current order can build the default appearance and then immediately rebuild the requested one.
-- Replace `capture_delay_frames` as the primary pose-control mechanism with explicit pose/phase setup plus a short render-settle delay.
-- Add front, side, and rear capture modes before adding more UI.
-- Add a ground grid, fit-to-subject framing, and silhouette mode.
-- Load valid appearances first, then calculate row positions from the valid list so a skipped resource does not leave uneven spacing.
-- Treat multi-character layouts as comparison cases, separate from a single-subject inspection mode.
+- ✅ `model.appearance` is set before adding the model to the scene tree, so `CharacterModel._ready()` builds it once instead of building the default appearance and immediately rebuilding it.
+- ✅ `capture_settle_frames` (renamed from `capture_delay_frames`) is a render-settle wait only; pose is set once via `set_exact_pose()` before the wait starts, not sampled from whatever phase a live simulation reached. `live_playback` opt-in still runs the old continuous simulation for windowed eyeballing, but capture off it is not reproducible by design.
+- ✅ Front, side (left/right), rear, and three-quarter camera views, via fit-to-subject framing (`_compute_view_transform`) — plus a `gameplay_camera` preset that replicates the real third-person rig.
+- ✅ Ground grid (`show_grid`), fit-to-subject framing, and `silhouette` stage preset (flat unshaded materials via `CharacterModel.set_silhouette_mode()`).
+- ✅ Row mode loads valid appearances first, then computes row positions from that filtered list, so a skipped resource no longer leaves uneven spacing.
+- ⬜ Multi-character layouts are still one "row mode," not split into a distinct comparison-case type from single-subject inspection — deferred to the interactive lab (build order step 2).
 
 ## Build order
 
-1. Stabilize the existing batch harness: deterministic pose phase, stage presets, camera views, metadata sidecar.
-2. Add the interactive Character Lab: working copy, parameter panel, pose scrubber, save-as, and comparison mode.
-3. Add preview cases and baseline captures for the responder appearances.
-4. Extract the shared stage and adapter contract.
-5. Add a tree adapter only once the tree generator exists.
+1. ✅ Stabilize the existing batch harness: deterministic pose phase, stage presets, camera views, metadata sidecar.
+2. ⬜ Add the interactive Character Lab: working copy, parameter panel, pose scrubber, save-as, and comparison mode.
+3. 🟡 Add preview cases and baseline captures for the responder appearances. Four example `PreviewCase` resources exist ([resources/preview_cases/](../../resources/preview_cases/)); no baseline images are checked in yet and there is no diffing/comparison-sheet tooling — see [Visual regression workflow](#visual-regression-workflow).
+4. ⬜ Extract the shared stage and adapter contract.
+5. ⬜ Add a tree adapter only once the tree generator exists.
 
 ## Done criteria
 

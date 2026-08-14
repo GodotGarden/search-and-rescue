@@ -12,11 +12,15 @@ There is no separate build step; Godot imports assets on open/run.
 
 - **Open the editor**: `godot --path . -e`
 - **Run the game** (main scene, two-player LAN host/join demo): `godot --path .` or F5 in the editor
-- **Run the procedural character preview lab** (headless dev harness, renders `CharacterAppearance` resources to a PNG and quits):
-  ```
+- **Run the procedural character preview lab** (dev harness, renders `CharacterAppearance` resources to a PNG + JSON metadata sidecar and quits — not `--headless`, it needs a real rendering context to produce pixels):
+  ```bash
+  # Row mode: side-by-side comparison of every *.tres in appearance_dir (or an explicit appearance_paths list)
   godot --path . res://scenes/dev/character_preview.tscn --resolution 1600x1000 --quit-after 15 -- output_path=/tmp/out.png
+
+  # Batch mode: named, reproducible PreviewCase captures (own appearance/pose/camera view/stage preset each)
+  godot --path . res://scenes/dev/character_preview.tscn --quit-after 60 -- cases=res://resources/preview_cases/responder_default_front.tres,res://resources/preview_cases/responder_default_walk_contact.tres
   ```
-  Overrides are passed as `key=value` after `--` (see `@export` vars at the top of `scripts/dev/character_preview.gd` for the full list: `appearance_dir`, `appearance_paths`, `simulate_walk_speed`, `simulate_grounded`, `camera_position`, etc.).
+  Overrides are passed as `key=value` after `--` (see `@export` vars at the top of `scripts/dev/character_preview.gd` for the full list: `appearance_dir`, `appearance_paths`, `cases`, `stage_preset` — `neutral_review`/`silhouette`/`gameplay_camera`, `camera_view` — `front`/`side_left`/`side_right`/`rear`/`three_quarter`, `pose_phase`/`pose_speed`/`pose_grounded`, `live_playback`, `show_grid`, `capture_settle_frames`). `PreviewCase` (`scripts/dev/preview_case.gd`) is the resource type for batch-mode entries; see `resources/preview_cases/` for examples.
 - There is no automated test suite yet. Verification is manual: run the affected scene in the editor and exercise the happy path plus one edge case (restart, leaving interaction range, interacting twice). For networked changes, test host+client across two machines/instances, not two copies of local state — see `docs/lan-multiplayer-testing.md`.
 
 ## Architecture
@@ -39,7 +43,7 @@ Full detail lives in `docs/architecture.md`; the essentials:
   - `CharacterAppearance` is a `.tres` `Resource`: cosmetic fields (height, build, skin/hair color, clothing color) carry no gameplay meaning; `head_equipment` is a separate, explicit gameplay-visible layer that visually overrides `hair_style` when set. Keep that split when adding new fields/slots.
   - Local/remote player identity color is a distinct disambiguation layer from cosmetic clothing color — don't fold one into the other.
   - The authoring `Resource` is not the wire format: appearance is sent host → clients once at spawn as a small versioned dictionary of primitives, then reconstructed locally into a `CharacterAppearance` instance per peer. Locomotion itself is never synchronized — each peer runs it locally off whatever position/velocity it already has.
-  - `docs/specifications/procedural-preview-lab.md` describes the (in-progress) generalization of the dev preview harness — a reusable preview stage + subject-adapter pattern for procedural visuals (characters now, trees/props later), plus a planned `CharacterPose` data contract for static poses (kneeling, prone, supine, etc.) layered on top of rest pose → posture → locomotion → interaction.
+  - `docs/specifications/procedural-preview-lab.md` describes the generalization of the dev preview harness — a reusable preview stage + subject-adapter pattern for procedural visuals (characters now, trees/props later). Build order step 1 (deterministic pose capture, camera-view/stage presets, batch `PreviewCase` mode) is implemented; the interactive lab UI, subject-adapter extraction, and the planned `CharacterPose` data contract for static poses (kneeling, prone, supine, etc.) are not yet built.
 
 **Regions**: each playable region is an independently loaded scene with a handful of authored points of interest — no world streaming, no shared coordinate system across regions, not an open world.
 
