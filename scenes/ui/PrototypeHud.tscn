@@ -16,7 +16,7 @@ script = ExtResource("1_hud")
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 370.0
-offset_bottom = 138.0
+offset_bottom = 158.0
 
 [node name="Margin" type="MarginContainer" parent="Readout"]
 theme_override_constants/margin_left = 12
@@ -35,13 +35,16 @@ text = "Level: Inland Island Test"
 [node name="ObjectiveLabel" type="Label" parent="Readout/Margin/Rows"]
 text = "Objective: Reach the trail marker"
 
+[node name="ToolbeltLabel" type="Label" parent="Readout/Margin/Rows"]
+text = "Toolbelt: binoculars and map"
+
 [node name="DebugLabel" type="Label" parent="Readout/Margin/Rows"]
 text = "Players: 0"
 
 [node name="EndSessionButton" type="Button" parent="."]
 offset_left = 16.0
-offset_top = 150.0
+offset_top = 170.0
 offset_right = 192.0
-offset_bottom = 186.0
+offset_bottom = 206.0
 mouse_filter = 0
 text = "End session"

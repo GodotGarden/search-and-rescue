@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/responder.gd" id="1_responder"]
 
@@ -13,6 +13,42 @@ height = 1.8
 [sub_resource type="StandardMaterial3D" id="Material_responder"]
 albedo_color = Color(0.1, 0.45, 0.9, 1)
 roughness = 0.8
+
+[sub_resource type="TorusMesh" id="TorusMesh_belt"]
+inner_radius = 0.36
+outer_radius = 0.44
+rings = 6
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="Material_belt"]
+albedo_color = Color(0.12, 0.14, 0.13, 1)
+roughness = 0.95
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_binocular"]
+top_radius = 0.075
+bottom_radius = 0.075
+height = 0.24
+radial_segments = 6
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="Material_binocular"]
+albedo_color = Color(0.07, 0.1, 0.1, 1)
+metallic = 0.2
+roughness = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_pouch"]
+size = Vector3(0.16, 0.28, 0.22)
+
+[sub_resource type="StandardMaterial3D" id="Material_pouch"]
+albedo_color = Color(0.6, 0.37, 0.16, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_map"]
+size = Vector3(0.24, 0.02, 0.18)
+
+[sub_resource type="StandardMaterial3D" id="Material_map"]
+albedo_color = Color(0.78, 0.78, 0.58, 1)
+roughness = 1.0
 
 [node name="Responder" type="CharacterBody3D"]
 script = ExtResource("1_responder")
@@ -32,6 +68,35 @@ billboard = 1
 pixel_size = 0.008
 outline_size = 3
 text = "Responder"
+
+[node name="Toolbelt" type="Node3D" parent="."]
+position = Vector3(0, 0.82, 0)
+
+[node name="Belt" type="MeshInstance3D" parent="Toolbelt"]
+mesh = SubResource("TorusMesh_belt")
+material_override = SubResource("Material_belt")
+
+[node name="BinocularLeft" type="MeshInstance3D" parent="Toolbelt"]
+position = Vector3(-0.08, 0.02, -0.4)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_binocular")
+material_override = SubResource("Material_binocular")
+
+[node name="BinocularRight" type="MeshInstance3D" parent="Toolbelt"]
+position = Vector3(0.08, 0.02, -0.4)
+rotation = Vector3(0, 0, 1.5708)
+mesh = SubResource("CylinderMesh_binocular")
+material_override = SubResource("Material_binocular")
+
+[node name="MapPouch" type="MeshInstance3D" parent="Toolbelt"]
+position = Vector3(-0.42, 0, 0.06)
+mesh = SubResource("BoxMesh_pouch")
+material_override = SubResource("Material_pouch")
+
+[node name="FoldedMap" type="MeshInstance3D" parent="Toolbelt/MapPouch"]
+position = Vector3(0, 0.15, 0)
+mesh = SubResource("BoxMesh_map")
+material_override = SubResource("Material_map")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 position = Vector3(0, 1.45, 0)
