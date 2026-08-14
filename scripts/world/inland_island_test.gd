@@ -4,6 +4,7 @@ const GROUND_COLOR := Color("668a4e")
 const TRAIL_COLOR := Color("b99c6b")
 const ROCK_COLOR := Color("56636a")
 const WATER_COLOR := Color("3b7fa5")
+const FOREST_SEED := 904201
 
 
 func _ready() -> void:
@@ -66,11 +67,16 @@ func _add_boundaries() -> void:
 
 
 func _add_forest() -> void:
-	for index in range(28):
-		var x := 38.0 + float(index % 7) * 11.0
-		var z := -70.0 + float(index / 7) * 14.0
-		_add_box("TreeTrunk%d" % index, Vector3(x, 2.0, z), Vector3(1.2, 4.0, 1.2), Color("604a32"))
-		_add_box("TreeCrown%d" % index, Vector3(x, 6.0, z), Vector3(7.0, 5.0, 7.0), Color("355f43"), false)
+	var random := RandomNumberGenerator.new()
+	random.seed = FOREST_SEED
+	for index in range(52):
+		var tree := ProceduralTree.create(FOREST_SEED + index)
+		tree.position = Vector3(
+			random.randf_range(35.0, 112.0),
+			0.0,
+			random.randf_range(-104.0, -24.0),
+		)
+		add_child(tree)
 
 
 func _add_slope(label: String, position: Vector3, size: Vector3, angle_degrees: float, color: Color) -> void:
