@@ -152,7 +152,9 @@ func _build_rig(app: CharacterAppearance) -> void:
 	# larger back panel — both share one material so set_identity_color() recolors them together.
 	var identity_material := _make_material(Color.WHITE)
 	_add_box(torso, Vector3(chest_half_width * 0.7, torso_height * 0.14, 0.02), Vector3(0, torso_height * 0.55, -torso_depth * 0.5 - 0.01), identity_material)
-	_add_box(torso, Vector3(chest_half_width * 1.1, torso_height * 0.3, 0.02), Vector3(0, torso_height * 0.55, torso_depth * 0.5 + 0.01), identity_material)
+	# Kept within chest_half_width so the panel stays flush with the torso's side silhouette
+	# instead of overhanging and reading as a detached floating card from angled/side views.
+	_add_box(torso, Vector3(chest_half_width * 0.9, torso_height * 0.3, 0.02), Vector3(0, torso_height * 0.55, torso_depth * 0.5 + 0.01), identity_material)
 	_identity_material = identity_material
 
 	var neck := _add_pivot(torso, "Neck", Vector3(0, torso_height * 0.8, 0))
