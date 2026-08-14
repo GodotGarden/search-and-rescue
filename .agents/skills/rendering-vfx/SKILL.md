@@ -30,4 +30,6 @@ Some changes only look like they're in this domain. Pause and confirm with the u
 
 Working shader/material/scene changes, verified in the affected scene under Forward+ — there's no separate shader test harness in this repo, so "run it and look at it" is the actual verification step; say so rather than implying automated coverage that doesn't exist. Note any frame-time-relevant decision (particle count, shader complexity, MultiMesh usage) explicitly rather than leaving performance implications implicit.
 
+If your environment has no display (common for sandboxed agents), "look at it" isn't available at all — fall back to `godot --headless --path . --check-only --script <path>` (syntax) and `godot --headless --path . <scene> --quit-after N` (confirms the scene and every new sub-resource/property parse and run without errors). This catches structural mistakes (a bad enum value on a `ParticleProcessMaterial`, a malformed gradient) but not whether the effect actually looks right — say clearly that you've only done a structural check and that someone with a display still needs to eyeball color/scale/timing before calling it done.
+
 Include a `## Specialist Handoff` section (exact format in `.github/copilot-instructions.md`) whenever the task touched another specialty's domain, even just to note "no changes needed there, confirmed by inspection."
