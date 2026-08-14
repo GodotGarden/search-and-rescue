@@ -63,19 +63,19 @@ cancel={
 }
 toggle_mouse_capture={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":4194305)]
+"events": [Object(InputEventKey,"physical_keycode":4194332)]
 }
-use_binoculars={
+equip_tool_1={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":66,"unicode":98)]
+"events": [Object(InputEventKey,"physical_keycode":49,"unicode":49)]
 }
-toggle_map={
+equip_tool_2={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":77,"unicode":109)]
+"events": [Object(InputEventKey,"physical_keycode":50,"unicode":50)]
 }
-toggle_compass={
+equip_tool_3={
 "deadzone": 0.5,
-"events": [Object(InputEventKey,"physical_keycode":67,"unicode":99)]
+"events": [Object(InputEventKey,"physical_keycode":51,"unicode":51)]
 }
 
 [physics]

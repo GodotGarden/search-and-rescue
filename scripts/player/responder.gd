@@ -10,6 +10,11 @@ const GRAVITY := 18.0
 const CAMERA_PITCH_LIMIT := deg_to_rad(65.0)
 const NETWORK_SEND_INTERVAL := 1.0 / 15.0
 
+enum Tool { BINOCULARS, MAP, COMPASS }
+
+signal equipped_tool_changed(tool: Tool)
+signal tool_used(tool: Tool)
+
 @onready var body_mesh: MeshInstance3D = $BodyMesh
 @onready var name_tag: Label3D = $NameTag
 @onready var camera_pivot: Node3D = $CameraPivot
@@ -22,6 +27,7 @@ var _network_yaw := 0.0
 var _network_send_elapsed := 0.0
 var _binoculars_active := false
 var _display_name := "Responder"
+var _equipped_tool: Tool = Tool.BINOCULARS
 
 
 func _ready() -> void:
@@ -46,11 +52,25 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_mouse_capture"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 		return
-	if event.is_action_pressed("use_binoculars"):
-		_set_binoculars_active(true)
+	if event.is_action_pressed("equip_tool_1"):
+		_equip_tool(Tool.BINOCULARS)
 		return
-	if event.is_action_released("use_binoculars"):
+	if event.is_action_pressed("equip_tool_2"):
+		_equip_tool(Tool.MAP)
+		return
+	if event.is_action_pressed("equip_tool_3"):
+		_equip_tool(Tool.COMPASS)
+		return
+	if event.is_action_pressed("interact"):
+		if _equipped_tool == Tool.BINOCULARS:
+			_set_binoculars_active(true)
+		else:
+			tool_used.emit(_equipped_tool)
+		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_released("interact") and _equipped_tool == Tool.BINOCULARS:
 		_set_binoculars_active(false)
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
@@ -85,6 +105,18 @@ func _physics_process(delta: float) -> void:
 
 func is_viewing_binoculars() -> bool:
 	return _binoculars_active
+
+
+func get_equipped_tool() -> Tool:
+	return _equipped_tool
+
+
+func _equip_tool(tool: Tool) -> void:
+	if _equipped_tool == tool:
+		return
+	_set_binoculars_active(false)
+	_equipped_tool = tool
+	equipped_tool_changed.emit(tool)
 
 
 func set_display_name(display_name: String) -> void:

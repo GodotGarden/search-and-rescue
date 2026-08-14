@@ -32,9 +32,9 @@ The game opens maximized and is HiDPI-aware on macOS. Its 1280×720 logical view
 
 The current main scene is a two-player LAN third-person walking demo. On the first machine, select **Host LAN session**. On the second machine, enter the host machine's LAN IP address and select **Join session**. Both machines use UDP port `8910`; allow it through the host firewall if needed.
 
-Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The mouse controls the orbit camera. <kbd>Escape</kbd> releases/captures the mouse; use the on-screen **End session** control to return the host—and connected client—to the session menu.
+Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The centre reticle is the interaction point. Press <kbd>1</kbd>, <kbd>2</kbd>, or <kbd>3</kbd> to equip a toolbelt slot, then use <kbd>E</kbd>: hold it for binoculars or press it to open the map/compass. <kbd>Escape</kbd> closes a map or compass view (or releases the mouse); <kbd>F1</kbd> toggles mouse capture. Use the on-screen **End session** control to return the host—and connected client—to the session menu.
 
-Enter a responder name before hosting or joining. Each responder carries a lightweight navigation toolbelt: hold <kbd>B</kbd> to look through binoculars, press <kbd>M</kbd> to open the inland-island map, and press <kbd>C</kbd> to inspect the magnetic compass. The map shows the current blockout, your position, the rescue centre, and the trail destination. These fixed tools are not yet part of an inventory or loadout system.
+Enter a responder name before hosting or joining. Each responder carries a lightweight fixed toolbelt: binoculars, a map, and a magnetic compass. The map shows the current blockout, your position, the rescue centre, and the trail destination. This three-slot hotbar is deliberately not a general inventory or loadout system yet.
 
 For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
 

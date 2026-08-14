@@ -42,7 +42,8 @@ Perform this sequence once per build that changes session, player, world, or sha
 | Names | Compare the labels above both responders. | Each machine shows its own name with “(You)” and the other player's chosen name. |
 | Replication | Have each player run from the rescue centre toward the trail destination, then stop and change direction. | The other instance sees responsive movement without a permanently frozen or duplicate responder. |
 | World consistency | Compare landmarks and objective text. | Both players see the same inland-island blockout and the objective “Reach the trail marker.” |
-| Mouse control | Press <kbd>Escape</kbd> while playing, then press it again. | The mouse releases and can be captured again without losing movement control. |
+| Toolbelt controls | Press <kbd>1</kbd>, <kbd>2</kbd>, and <kbd>3</kbd>, then use <kbd>E</kbd>. | The matching hotbar slot highlights; binoculars zoom while <kbd>E</kbd> is held, while map and compass open on a press. |
+| Mouse control | Press <kbd>F1</kbd> while playing, then press it again. | The mouse releases and can be captured again without losing movement control. <kbd>Escape</kbd> closes an open map or compass. |
 | Host exit | Select **End session** on the host. | The host and client both return safely to the session menu; the client explains that the host disconnected. |
 
 Record the commit, machine/OS pair, Godot version, and any failure in the playtest notes. Include whether the test was same-machine or LAN; a passing loopback test does not prove LAN connectivity.
