@@ -63,7 +63,7 @@ func _spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> v
 	responder.set_display_name(display_name)
 	active_world.get_node("Players").add_child(responder)
 	responder.global_transform = active_world.get_spawn_transform(spawn_index)
-	if peer_id == multiplayer.get_unique_id():
+	if responder.is_multiplayer_authority():
 		hud.set_local_responder(responder)
 		responder.equipped_tool_changed.connect(hud.set_equipped_tool)
 		responder.tool_used.connect(hud.use_equipped_tool)

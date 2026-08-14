@@ -52,26 +52,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_mouse_capture"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 		return
-	if event.is_action_pressed("equip_tool_1"):
-		_equip_tool(Tool.BINOCULARS)
-		return
-	if event.is_action_pressed("equip_tool_2"):
-		_equip_tool(Tool.MAP)
-		return
-	if event.is_action_pressed("equip_tool_3"):
-		_equip_tool(Tool.COMPASS)
-		return
-	if event.is_action_pressed("interact"):
-		if _equipped_tool == Tool.BINOCULARS:
-			_set_binoculars_active(true)
-		else:
-			tool_used.emit(_equipped_tool)
-		get_viewport().set_input_as_handled()
-		return
-	if event.is_action_released("interact") and _equipped_tool == Tool.BINOCULARS:
-		_set_binoculars_active(false)
-		get_viewport().set_input_as_handled()
-		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		_look_pitch = clampf(_look_pitch - event.relative.y * mouse_sensitivity, -CAMERA_PITCH_LIMIT, CAMERA_PITCH_LIMIT)
@@ -111,12 +91,19 @@ func get_equipped_tool() -> Tool:
 	return _equipped_tool
 
 
-func _equip_tool(tool: Tool) -> void:
+func equip_tool(tool: Tool) -> void:
 	if _equipped_tool == tool:
 		return
 	_set_binoculars_active(false)
 	_equipped_tool = tool
 	equipped_tool_changed.emit(tool)
+
+
+func use_equipped_tool(pressed: bool) -> void:
+	if _equipped_tool == Tool.BINOCULARS:
+		_set_binoculars_active(pressed)
+	elif pressed:
+		tool_used.emit(_equipped_tool)
 
 
 func set_display_name(display_name: String) -> void:

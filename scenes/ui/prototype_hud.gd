@@ -13,6 +13,7 @@ const TOOL_LABELS := ["Binoculars", "Map", "Compass"]
 
 var _local_responder: Node3D
 var _equipped_tool := 0
+var _local_authority := 0
 
 
 func _ready() -> void:
@@ -22,6 +23,7 @@ func _ready() -> void:
 
 func set_local_responder(responder: Node3D) -> void:
 	_local_responder = responder
+	_local_authority = responder.get_multiplayer_authority() if responder != null else 0
 	if responder == null:
 		map_overlay.visible = false
 		compass_overlay.visible = false
@@ -47,6 +49,30 @@ func _unhandled_input(event: InputEvent) -> void:
 		else:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		get_viewport().set_input_as_handled()
+		return
+	if event.is_action_pressed("equip_tool_1"):
+		_select_tool(0)
+	elif event.is_action_pressed("equip_tool_2"):
+		_select_tool(1)
+	elif event.is_action_pressed("equip_tool_3"):
+		_select_tool(2)
+	elif event.is_action_pressed("interact"):
+		_local_responder.use_equipped_tool(true)
+	else:
+		return
+	get_viewport().set_input_as_handled()
+
+
+func _input(event: InputEvent) -> void:
+	if not is_instance_valid(_local_responder):
+		return
+	if event.is_action_released("interact"):
+		_local_responder.use_equipped_tool(false)
+
+
+func _select_tool(tool: int) -> void:
+	_local_responder.equip_tool(tool)
+	set_equipped_tool(tool)
 
 
 func set_equipped_tool(tool: int) -> void:
@@ -65,5 +91,5 @@ func use_equipped_tool(tool: int) -> void:
 
 func set_session_info(role: String, status: String, player_count: int) -> void:
 	$Readout/Margin/Rows/RoleLabel.text = "%s — %s" % [role, status]
-	$Readout/Margin/Rows/DebugLabel.text = "Players: %d / 2" % player_count
+	$Readout/Margin/Rows/DebugLabel.text = "Players: %d / 2 — tool peer: %d" % [player_count, _local_authority]
 	$EndSessionButton.visible = role == "Host"
