@@ -55,13 +55,14 @@ func _load_level(level_path: String) -> void:
 	_refresh_hud()
 
 
-func _spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> void:
+func _spawn_responder(peer_id: int, spawn_index: int, display_name: String, appearance_payload: Dictionary) -> void:
 	if active_world == null or active_world.get_node_or_null("Players/Responder_%d" % peer_id) != null:
 		return
 	var responder := RESPONDER_SCENE.instantiate()
 	responder.name = "Responder_%d" % peer_id
 	responder.set_multiplayer_authority(peer_id)
 	responder.set_display_name(display_name)
+	responder.set_appearance_payload(appearance_payload)
 	active_world.get_node("Players").add_child(responder)
 	responder.global_transform = active_world.get_spawn_transform(spawn_index)
 	if responder.is_multiplayer_authority():
