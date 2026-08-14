@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/prototype_hud.gd" id="1_hud"]
+
+[node name="PrototypeHud" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="Readout" type="PanelContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 370.0
+offset_bottom = 138.0
+
+[node name="Margin" type="MarginContainer" parent="Readout"]
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Rows" type="VBoxContainer" parent="Readout/Margin"]
+
+[node name="RoleLabel" type="Label" parent="Readout/Margin/Rows"]
+text = "Disconnected"
+
+[node name="LevelLabel" type="Label" parent="Readout/Margin/Rows"]
+text = "Level: Inland Island Test"
+
+[node name="ObjectiveLabel" type="Label" parent="Readout/Margin/Rows"]
+text = "Objective: Reach the trail marker"
+
+[node name="DebugLabel" type="Label" parent="Readout/Margin/Rows"]
+text = "Players: 0"
+
+[node name="EndSessionButton" type="Button" parent="."]
+offset_left = 16.0
+offset_top = 150.0
+offset_right = 192.0
+offset_bottom = 186.0
+mouse_filter = 0
+text = "End session"

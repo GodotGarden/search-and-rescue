@@ -1,14 +1,21 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scenes/main/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/multiplayer/session.gd" id="2_session"]
+[ext_resource type="PackedScene" path="res://scenes/multiplayer/SessionMenu.tscn" id="3_menu"]
+[ext_resource type="PackedScene" path="res://scenes/ui/PrototypeHud.tscn" id="4_hud"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_main")
 
-[node name="Placeholder" type="CanvasLayer" parent="."]
+[node name="Session" type="Node" parent="."]
+script = ExtResource("2_session")
 
-[node name="Message" type="Label" parent="Placeholder"]
-offset_left = 40.0
-offset_top = 40.0
-theme_override_font_sizes/font_size = 24
-text = "Search and Rescue\nLoading prototype foundation…"
+[node name="ActiveLevel" type="Node3D" parent="."]
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="SessionMenu" parent="Interface" instance=ExtResource("3_menu")]
+
+[node name="PrototypeHud" parent="Interface" instance=ExtResource("4_hud")]
+visible = false

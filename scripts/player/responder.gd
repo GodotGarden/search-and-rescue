@@ -8,6 +8,7 @@ extends CharacterBody3D
 
 const GRAVITY := 18.0
 const CAMERA_PITCH_LIMIT := deg_to_rad(65.0)
+const NETWORK_SEND_INTERVAL := 1.0 / 15.0
 
 @onready var body_mesh: MeshInstance3D = $BodyMesh
 @onready var name_tag: Label3D = $NameTag
@@ -15,6 +16,9 @@ const CAMERA_PITCH_LIMIT := deg_to_rad(65.0)
 @onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 
 var _look_pitch := -0.2
+var _network_position := Vector3.ZERO
+var _network_yaw := 0.0
+var _network_send_elapsed := 0.0
 
 
 func _ready() -> void:
@@ -26,6 +30,9 @@ func _ready() -> void:
 	body_mesh.material_override = material
 	if is_local:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	else:
+		_network_position = global_position
+		_network_yaw = rotation.y
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -42,6 +49,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
+		global_position = global_position.lerp(_network_position, minf(delta * 12.0, 1.0))
+		rotation.y = lerp_angle(rotation.y, _network_yaw, minf(delta * 12.0, 1.0))
 		return
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
@@ -54,3 +63,35 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, move_direction.x * speed, acceleration * delta)
 	velocity.z = move_toward(velocity.z, move_direction.z * speed, acceleration * delta)
 	move_and_slide()
+	_network_send_elapsed += delta
+	if _network_send_elapsed >= NETWORK_SEND_INTERVAL:
+		_network_send_elapsed = 0.0
+		_send_network_state()
+
+
+func _send_network_state() -> void:
+	if multiplayer.multiplayer_peer == null or multiplayer.multiplayer_peer is OfflineMultiplayerPeer:
+		return
+	if multiplayer.is_server():
+		relay_state.rpc(global_position, rotation.y, velocity)
+	else:
+		submit_state.rpc_id(1, global_position, rotation.y, velocity)
+
+
+@rpc("any_peer", "call_remote", "unreliable")
+func submit_state(position_value: Vector3, yaw: float, movement_velocity: Vector3) -> void:
+	if not multiplayer.is_server() or multiplayer.get_remote_sender_id() != get_multiplayer_authority():
+		return
+	_apply_network_state(position_value, yaw, movement_velocity)
+	relay_state.rpc(position_value, yaw, movement_velocity)
+
+
+@rpc("authority", "call_remote", "unreliable")
+func relay_state(position_value: Vector3, yaw: float, movement_velocity: Vector3) -> void:
+	_apply_network_state(position_value, yaw, movement_velocity)
+
+
+func _apply_network_state(position_value: Vector3, yaw: float, movement_velocity: Vector3) -> void:
+	_network_position = position_value
+	_network_yaw = yaw
+	velocity = movement_velocity
