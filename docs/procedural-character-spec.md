@@ -1,6 +1,6 @@
 # Procedural Character Specification
 
-**Status: accepted for the MVP.** The architecture (segmented rig, procedural locomotion, appearance/equipment data model) is settled; remaining work is implementation against the phased build order below, not further design debate.
+**Status: accepted for the MVP.** The architecture (segmented rig, procedural locomotion, appearance/equipment data model) is settled. Build order steps 1–4 below (static rig, preset variation, idle/walk/run/airborne locomotion, multiplayer spawn sync) are implemented in `character_builder.gd`, `procedural_locomotion.gd`, and `session.gd`/`main.gd`; step 5 (performance check-in) and the observable acceptance criteria are not yet verified.
 
 The first playable build of this architecture reads as too visually uniform (stacked rectangles rather than a designed responder). See [Character Appearance Visual Design](character-appearance-visual-design.md) for the follow-up design goals on `CharacterAppearance`/`character_builder.gd` — a visual pass on top of this document's architecture, not a revision of it.
 
@@ -29,7 +29,9 @@ Replace the placeholder capsule in [Responder.tscn](../scenes/player/Responder.t
 
 Godot's usual character pipeline is a single skinned mesh deformed by a `Skeleton3D`. That needs a rigger to weight-paint vertices to bones — the exact gap this project doesn't have.
 
-Instead, build the body as a **hierarchy of joints**, where each joint is a `Node3D` holding one or two primitive meshes (the current `Responder.tscn` already does this for the toolbelt: belt, binoculars, pouch, and compass are separate primitive nodes, not one mesh). A shoulder joint rotates and everything parented under it — upper arm, elbow joint, forearm, hand — moves with it. No skinning, no weight painting, no imported rig.
+Instead, build the body as a **hierarchy of joints**, where each joint is a `Node3D` holding one or two primitive meshes. A shoulder joint rotates and everything parented under it — upper arm, elbow joint, forearm, hand — moves with it. No skinning, no weight painting, no imported rig.
+
+(Note: the toolbelt — binoculars, map, compass — is a HUD-only fixed hotbar, not a 3D attachment on the responder; see `scenes/ui/PrototypeHud.tscn`. `Responder.tscn` has no belt/pouch mesh nodes.)
 
 ```text
 CharacterRig (Node3D)
@@ -75,19 +77,19 @@ Left implicit, these are exactly the kind of thing that quietly diverges between
 
 A `Resource` (`.tres`), following the project's existing preference for small data-driven resources (see `GearDefinition` in [architecture.md](architecture.md#regions-and-progression)). Every continuous field is clamped at the resource level (not just by convention in whatever UI eventually sets it), and `generator_version` exists specifically so a seed reproduces the same shape later even if the generation code changes.
 
-| Field | Type | Effect |
-| --- | --- | --- |
-| `height_m` | float, clamped e.g. 1.5–2.0 | Overall rig *mesh* scale only for this pass — see MVP decisions below. Reference: current Responder capsule is 1.75 m ([goxel-workflow.md](goxel-workflow.md#quick-size-reference)); default here should match. |
-| `build` | float 0–1 | Torso/limb girth — narrow to stocky. |
-| `shoulder_hip_ratio` | float, clamped to a plausible range | Continuous silhouette slider rather than a binary gender switch; presets can clamp to typical sub-ranges but the field itself stays continuous. |
-| `head_scale` | float, clamped | Head size relative to body — also a cheap way to get a distinct "kid/NPC" silhouette later. |
-| `skin_color` | Color | — |
-| `hair_style` | enum (`none`, `short`, `bun`) | Small fixed set of blocky attachments, not free-form hair geometry. Purely cosmetic — see equipment-vs-cosmetic rule below. |
-| `hair_color` | Color | — |
-| `head_equipment` | enum (`none`, `cap`, `rescue_helmet`, …), separate from `hair_style` | Gameplay-visible headwear. When set to anything but `none`, it renders in place of/over hair at the head socket and takes visual precedence over `hair_style` — cosmetics don't need to coordinate with what equipment is worn. |
-| `clothing_primary_color` / `clothing_secondary_color` | Color | Cosmetic uniform/clothing colors only. Deliberately **not** the local/remote disambiguation color — see below. |
-| `variant_seed` | int | Deterministic jitter within the above ranges, for generating a crowd of distinct casualties/NPCs without hand-authoring each one. **Host/internal only for this milestone** — no player-facing customization UI; used to vary presets and future NPC casualties, not exposed as a "create your responder" screen. |
-| `generator_version` | int | Bumped when builder logic changes shape in a way that would make an old seed produce a different result. Not player-facing. |
+| Field                                                 | Type                                                                 | Effect                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `height_m`                                            | float, clamped e.g. 1.5–2.0                                          | Overall rig *mesh* scale only for this pass — see MVP decisions below. Reference: current Responder capsule is 1.75 m ([goxel-workflow.md](goxel-workflow.md#quick-size-reference)); default here should match.                                                                                                   |
+| `build`                                               | float 0–1                                                            | Torso/limb girth — narrow to stocky.                                                                                                                                                                                                                                                                              |
+| `shoulder_hip_ratio`                                  | float, clamped to a plausible range                                  | Continuous silhouette slider rather than a binary gender switch; presets can clamp to typical sub-ranges but the field itself stays continuous.                                                                                                                                                                   |
+| `head_scale`                                          | float, clamped                                                       | Head size relative to body — also a cheap way to get a distinct "kid/NPC" silhouette later.                                                                                                                                                                                                                       |
+| `skin_color`                                          | Color                                                                | —                                                                                                                                                                                                                                                                                                                 |
+| `hair_style`                                          | enum (`none`, `short`, `bun`)                                        | Small fixed set of blocky attachments, not free-form hair geometry. Purely cosmetic — see equipment-vs-cosmetic rule below.                                                                                                                                                                                       |
+| `hair_color`                                          | Color                                                                | —                                                                                                                                                                                                                                                                                                                 |
+| `head_equipment`                                      | enum (`none`, `cap`, `rescue_helmet`, …), separate from `hair_style` | Gameplay-visible headwear. When set to anything but `none`, it renders in place of/over hair at the head socket and takes visual precedence over `hair_style` — cosmetics don't need to coordinate with what equipment is worn.                                                                                   |
+| `clothing_primary_color` / `clothing_secondary_color` | Color                                                                | Cosmetic uniform/clothing colors only. Deliberately **not** the local/remote disambiguation color — see below.                                                                                                                                                                                                    |
+| `variant_seed`                                        | int                                                                  | Deterministic jitter within the above ranges, for generating a crowd of distinct casualties/NPCs without hand-authoring each one. **Host/internal only for this milestone** — no player-facing customization UI; used to vary presets and future NPC casualties, not exposed as a "create your responder" screen. |
+| `generator_version`                                   | int                                                                  | Bumped when builder logic changes shape in a way that would make an old seed produce a different result. Not player-facing.                                                                                                                                                                                       |
 
 **Cosmetic appearance vs. gameplay-visible equipment is a hard split.** `CharacterAppearance` (hair, skin, clothing color, build) is purely cosmetic and carries no gameplay meaning. `head_equipment` — and any future slot like it — is an explicit attachment layer that can communicate state (e.g. wearing a rescue helmet) without making cosmetics semantic or ambiguous over the network. Keep that boundary when adding future slots rather than overloading a cosmetic field to also mean something mechanically.
 
@@ -100,7 +102,7 @@ For this pass, `CharacterAppearance` changes what the model *looks like* and not
 ## Integration points
 
 - New scene, e.g. `scenes/character/CharacterModel.tscn`, with `scripts/character/character_builder.gd` (builds the joint hierarchy + meshes from a `CharacterAppearance`) and `scripts/character/procedural_locomotion.gd` (poses joints per frame from horizontal velocity + grounded state). The builder runs at `_ready()` at minimum; an `@tool`-annotated editor preview is a nice-to-have on top of that runtime path, not something the runtime depends on — keeps editor-node ownership/cleanup out of the critical path.
-- `Responder.tscn` swaps `BodyMesh` for an instance of `CharacterModel.tscn`. It needs to expose named attachment sockets — at least `HeadSocket`, `HipSocket`/`Toolbelt` anchor, `HandL`, `HandR` — since the existing toolbelt, name tag, and camera pivot are currently positioned against the capsule's fixed geometry and will need to reattach to the new model's actual proportions rather than being untouched by the swap.
+- `Responder.tscn` swaps `BodyMesh` for an instance of `CharacterModel.tscn`. It needs to expose named attachment sockets — at least `HeadSocket`, `HipSocket` (for future hand-held/waist equipment), `HandL`, `HandR` — since the existing name tag and camera pivot were positioned against the capsule's fixed geometry and needed to reattach to the new model's actual proportions rather than being untouched by the swap. **Implemented**: `CharacterModel.get_head_socket()`/`get_hip_socket()`/`get_hand_socket()` expose these; `responder.gd`'s `_attach_sockets()` reparents the name tag to `HeadSocket` and repositions `CameraPivot` to the head socket's height.
 - `responder.gd` feeds the model horizontal velocity and grounded state each physics frame instead of owning animation logic itself.
 - Casualty/hiker reuse: same `CharacterModel.tscn` + a limbs-at-rest or lying-down pose, once that content is scoped — not part of this pass's build order, just why the builder shouldn't be player-specific from the start.
 
@@ -114,7 +116,7 @@ For this pass, `CharacterAppearance` changes what the model *looks like* and not
 
 ## Suggested phased build order
 
-1. **Static rig, no animation.** Builder script assembles the joint hierarchy and meshes from one hardcoded `CharacterAppearance`; replaces the capsule; reattach toolbelt/name-tag/camera to the new sockets. Verify silhouette and scale at normal camera distance, matching the [asset checklist](assets-and-models.md#asset-checklist).
+1. **Static rig, no animation.** Builder script assembles the joint hierarchy and meshes from one hardcoded `CharacterAppearance`; replaces the capsule; reattach name-tag/camera to the new sockets. Verify silhouette and scale at normal camera distance, matching the [asset checklist](assets-and-models.md#asset-checklist).
 2. **Parameter variation.** Wire up 2–3 preset `CharacterAppearance` resources (e.g., visibly different heights/builds/colors) to confirm the generation logic actually responds to the data model, not just one hardcoded shape, and that clamps hold at the extremes.
 3. **Idle + walk + run + airborne.** `ProceduralLocomotion` driven by horizontal velocity and grounded state, using distance-based phase and rest-pose-plus-delta rotation as described above. Tune amplitude/frequency by eye.
 4. **Multiplayer spawn sync.** Send the wire-format payload once per spawn, including late joiners and respawns; confirm both peers render the same shape for a given player. Confirm the identity-color layer still disambiguates local/remote independent of any clothing color chosen.
@@ -137,7 +139,7 @@ Observable, not just "code exists":
 - [ ] Three deliberately different `CharacterAppearance` presets are readable at normal gameplay camera distance and stay inside the existing (unchanged) collision silhouette.
 - [ ] Idle, walk, run, stop, and airborne transitions show no rotation drift, popping, or a joint stuck at an implausible angle.
 - [ ] Two connected peers, plus one peer that joins after spawn, all render the same appearance for a given player.
-- [ ] Toolbelt items, name tag, and camera stay correctly positioned across all approved appearance presets.
+- [ ] Name tag and camera stay correctly positioned across all approved appearance presets.
 - [ ] Local vs. remote identity is still visually unambiguous regardless of chosen clothing colors.
 - [ ] Frame time holds at the two-player MVP's expected character count.
 
