@@ -44,10 +44,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 		return
 	if event.is_action_pressed("use_binoculars"):
-		_binoculars_active = true
+		_set_binoculars_active(true)
 		return
 	if event.is_action_released("use_binoculars"):
-		_binoculars_active = false
+		_set_binoculars_active(false)
 		return
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
@@ -82,6 +82,14 @@ func _physics_process(delta: float) -> void:
 
 func is_viewing_binoculars() -> bool:
 	return _binoculars_active
+
+
+func _set_binoculars_active(active: bool) -> void:
+	_binoculars_active = active
+	# Only the owning player hides their own responder; the remote peer still sees it.
+	body_mesh.visible = not active
+	$Toolbelt.visible = not active
+	name_tag.visible = not active
 
 
 func _send_network_state() -> void:
