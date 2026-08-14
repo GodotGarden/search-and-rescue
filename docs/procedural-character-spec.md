@@ -2,6 +2,8 @@
 
 **Status: accepted for the MVP.** The architecture (segmented rig, procedural locomotion, appearance/equipment data model) is settled; remaining work is implementation against the phased build order below, not further design debate.
 
+The first playable build of this architecture reads as too visually uniform (stacked rectangles rather than a designed responder). See [Character Appearance Visual Design](character-appearance-visual-design.md) for the follow-up design goals on `CharacterAppearance`/`character_builder.gd` — a visual pass on top of this document's architecture, not a revision of it.
+
 ## Purpose
 
 Replace the placeholder capsule in [Responder.tscn](../scenes/player/Responder.tscn) with a generated low-poly humanoid that can be customized (stature, build, gender presentation, coloring) and animated (idle, walk, run, and later gestures) without a 3D modeller or rigger. This is the "purpose-built follow-up workflow" that [assets-and-models.md](assets-and-models.md#goxel-source-and-export-format) anticipated once a character needs a skeleton, animation, or hierarchy.
