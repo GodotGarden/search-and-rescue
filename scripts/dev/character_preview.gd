@@ -47,14 +47,22 @@ const GAMEPLAY_CAMERA_FOV := 70.0
 @export var ground_size: float = 10.0
 @export var show_grid: bool = true
 
-## Row mode pose, applied once (not simulated) unless live_playback is true. Normalized 0..1
-## gait phase; see "Character animation contract" in docs/specifications/procedural-preview-lab.md.
+## Row mode pose. LOCOMOTION (default) uses pose_phase/pose_speed/pose_grounded below, applied
+## once (not simulated) unless live_playback is true. KNEEL_ONE_KNEE holds the static interaction
+## pose instead and ignores pose_phase/pose_speed/pose_grounded/live_playback. See "Character
+## animation contract" in docs/specifications/procedural-preview-lab.md.
+@export var pose: PreviewCase.Pose = PreviewCase.Pose.LOCOMOTION
+## Normalized 0..1 gait phase; see "Character animation contract" in
+## docs/specifications/procedural-preview-lab.md.
 @export_range(0.0, 1.0) var pose_phase: float = 0.0
 @export var pose_speed: float = 0.0
 @export var pose_grounded: bool = true
+## KNEEL_ONE_KNEE only: true = left knee down/right foot planted, false = right knee down/left
+## foot planted.
+@export var kneeling_leg_left: bool = false
 ## True continuously drives locomotion instead of holding pose_phase — for eyeballing a walk/run
 ## cycle in a windowed run. Capture then grabs whatever phase playback has reached, so this is not
-## reproducible; leave false for deterministic captures.
+## reproducible; leave false for deterministic captures. Ignored while `pose` is not LOCOMOTION.
 @export var live_playback: bool = false
 
 ## Frames to wait after building/posing before capturing, so shadows/materials settle. Not a
@@ -125,12 +133,16 @@ func _parse_cli_overrides() -> void:
 				ground_size = value.to_float()
 			"show_grid":
 				show_grid = value.to_lower() != "false"
+			"pose":
+				pose = _parse_enum_value(PreviewCase.Pose.keys(), value, pose, "pose") as PreviewCase.Pose
 			"pose_phase":
 				pose_phase = value.to_float()
 			"pose_speed":
 				pose_speed = value.to_float()
 			"pose_grounded":
 				pose_grounded = value.to_lower() != "false"
+			"kneeling_leg_left":
+				kneeling_leg_left = value.to_lower() == "true"
 			"live_playback":
 				live_playback = value.to_lower() == "true"
 			"capture_settle_frames":
@@ -348,7 +360,9 @@ func _start_row_mode() -> void:
 		model.appearance = valid_appearances[i]
 		add_child(model)
 		model.position = Vector3((i - (count - 1) / 2.0) * spacing, 0, 0)
-		if not live_playback:
+		if pose == PreviewCase.Pose.KNEEL_ONE_KNEE:
+			model.set_kneel_one_knee_pose(kneeling_leg_left)
+		elif not live_playback:
 			model.set_exact_pose(pose_phase, pose_speed, pose_grounded)
 		model.set_silhouette_mode(stage_preset == PreviewCase.StagePreset.SILHOUETTE)
 		_models.append(model)
@@ -394,9 +408,11 @@ func _process_row_frame() -> void:
 			"appearances": appearances_meta,
 			"camera_view": PreviewCase.CameraView.keys()[camera_view].to_lower(),
 			"stage_preset": PreviewCase.StagePreset.keys()[stage_preset].to_lower(),
+			"pose": PreviewCase.Pose.keys()[pose].to_lower(),
 			"pose_phase": pose_phase,
 			"pose_speed": pose_speed,
 			"pose_grounded": pose_grounded,
+			"kneeling_leg_left": kneeling_leg_left,
 			"live_playback": live_playback,
 		})
 	if quit_after_capture and _row_frames >= capture_settle_frames + 2:
@@ -453,7 +469,10 @@ func _setup_batch_case(preview_case: PreviewCase) -> void:
 	model.appearance = appearance
 	add_child(model)
 	model.position = Vector3.ZERO
-	model.set_exact_pose(preview_case.pose_phase, preview_case.pose_speed, preview_case.pose_grounded)
+	if preview_case.pose == PreviewCase.Pose.KNEEL_ONE_KNEE:
+		model.set_kneel_one_knee_pose(preview_case.kneeling_leg_left)
+	else:
+		model.set_exact_pose(preview_case.pose_phase, preview_case.pose_speed, preview_case.pose_grounded)
 	model.set_silhouette_mode(preview_case.stage_preset == PreviewCase.StagePreset.SILHOUETTE)
 	_batch_model = model
 
@@ -478,9 +497,11 @@ func _process_batch_frame() -> void:
 			"payload": _json_safe_payload(appearance.to_payload()),
 			"camera_view": preview_case.get_camera_view_name(),
 			"stage_preset": preview_case.get_stage_preset_name(),
+			"pose": preview_case.get_pose_name(),
 			"pose_phase": preview_case.pose_phase,
 			"pose_speed": preview_case.pose_speed,
 			"pose_grounded": preview_case.pose_grounded,
+			"kneeling_leg_left": preview_case.kneeling_leg_left,
 		})
 	elif _batch_settle_frame > capture_settle_frames:
 		_advance_batch_case()

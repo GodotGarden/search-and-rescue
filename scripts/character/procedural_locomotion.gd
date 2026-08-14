@@ -110,6 +110,73 @@ func _blend_airborne(airborne_blend: float) -> void:
 	_lerp_rotation_x("ShoulderR", AIRBORNE_SHOULDER_LIFT, airborne_blend, -SHOULDER_SWING_CLAMP, SHOULDER_SWING_CLAMP)
 
 
+# --- Static interaction pose: kneel_one_knee ----------------------------------------------------
+# See the "Appendix: Character Pose Library" in docs/specifications/procedural-preview-lab.md
+# (category: standing interaction, implementation: "static joint pose with optional blend").
+# Deliberately its own, looser set of per-joint clamps rather than reusing the locomotion
+# constants above: this is a held static pose, not a cyclic gait, so it needs a deeper hip/knee
+# fold than any walk/run stride ever reaches. Still clamped to a plausible range so a bad value
+# can't visibly invert a limb, matching the "Joint rotation is clamped per joint" rig convention.
+#
+# Sign convention (verified against the walk gait, e.g. responder_default_walk_contact.tres):
+# Knee is a child of Hip, both rotating about the same local X axis, so their angles compose
+# additively — a leg's total absolute tilt from vertical is (hip angle + knee angle), not just
+# the knee angle in isolation. The walk cycle only ever adds a *positive* knee angle on top of a
+# *negative* (trailing) hip angle, which pulls the shin back toward vertical (a natural heel-lift
+# fold) — it never needs a forward hip to compose with a positive knee, so it never surfaces this.
+# A static pose that plants a forward-swung leg has to counter-rotate the knee *negative* to bring
+# the shin back down under the hip instead of continuing to curl it forward past horizontal.
+const KNEEL_SUPPORT_HIP := 0.75 # Front/support leg: thigh swings forward ~43°, foot plants ahead.
+const KNEEL_SUPPORT_KNEE := -0.55 # Counter-rotates the hip angle so the shin hangs close to vertical under the knee (a planted lunge leg), instead of continuing to curl forward. Kept shallower than an anatomical ~90° lunge specifically to limit how far the planted foot floats above the ground plane — see the rig-limitation note below; this rig cannot fully close that gap without a root offset.
+const KNEEL_DOWN_HIP := -0.15 # Kneeling leg: thigh stays close to vertical, small backward cant.
+const KNEEL_DOWN_KNEE := -1.1 # Continues rotating the same (backward) direction as the hip, folding the shin back along the ground behind the knee.
+const KNEEL_HIP_CLAMP := 1.3
+const KNEEL_KNEE_CLAMP_MIN := -1.9
+const KNEEL_KNEE_CLAMP_MAX := 0.15
+const KNEEL_SHOULDER_LEAN := 0.3 # Small forward shoulder lean; hands read as "ready," not swinging.
+const KNEEL_ELBOW_BEND := 0.35
+const KNEEL_SHOULDER_CLAMP := SHOULDER_SWING_CLAMP
+const KNEEL_ELBOW_CLAMP := ELBOW_BEND_CLAMP
+const KNEEL_TORSO_LEAN := -0.32 # Negative leans forward, toward the casualty (see sign-convention note above); torso/head clamps are intentionally wider than idle sway's.
+const KNEEL_TORSO_CLAMP := 0.4
+const KNEEL_HEAD_TILT := -0.18 # Negative tilts the head further down, toward the casualty.
+const KNEEL_HEAD_CLAMP := 0.3
+
+
+## Static "one knee down, one foot planted" interaction pose — the responder/casualty treatment
+## pose from the Character Pose Library appendix (docs/specifications/procedural-preview-lab.md).
+## Not part of the locomotion cycle: it ignores gait/idle phase and is unaffected by
+## update()/apply_pose(). Call this once to hold the pose (e.g. from a preview case or an
+## interaction state); call set_exact_pose()/update() again to leave it — there is no blend_out
+## yet (see the pose data contract's blend_in/blend_out fields, not implemented for this pose).
+## kneeling_leg_left selects which leg kneels: true = left knee down, right foot planted forward.
+##
+## Rig-limitation note, flagged rather than silently worked around: the model root/pelvis position
+## is fixed at build time (see CharacterModel._build_rig()'s Pelvis pivot) and this pose only
+## rotates joints — it does not lower the root. The kneeling knee therefore will not literally
+## touch the ground plane; it reads as a deep-kneel silhouette, not floor-accurate ground contact.
+## A floor-accurate version would need a root offset and/or coordination with collider height and
+## the camera-pivot height cached at spawn (responder.gd's _attach_sockets()) — out of scope for
+## this visual-only pose evaluator; see the character-creature-systems skill's "flag rather than
+## silently decide" rule for collision/grounded-state-adjacent changes.
+func apply_kneel_one_knee_pose(kneeling_leg_left: bool = false) -> void:
+	var support_suffix := "L" if kneeling_leg_left else "R"
+	var down_suffix := "R" if kneeling_leg_left else "L"
+
+	_apply_rotation_x("Hip%s" % support_suffix, KNEEL_SUPPORT_HIP, -KNEEL_HIP_CLAMP, KNEEL_HIP_CLAMP)
+	_apply_rotation_x("Knee%s" % support_suffix, KNEEL_SUPPORT_KNEE, KNEEL_KNEE_CLAMP_MIN, KNEEL_KNEE_CLAMP_MAX)
+	_apply_rotation_x("Hip%s" % down_suffix, KNEEL_DOWN_HIP, -KNEEL_HIP_CLAMP, KNEEL_HIP_CLAMP)
+	_apply_rotation_x("Knee%s" % down_suffix, KNEEL_DOWN_KNEE, KNEEL_KNEE_CLAMP_MIN, KNEEL_KNEE_CLAMP_MAX)
+
+	_apply_rotation_x("ShoulderL", KNEEL_SHOULDER_LEAN, -KNEEL_SHOULDER_CLAMP, KNEEL_SHOULDER_CLAMP)
+	_apply_rotation_x("ShoulderR", KNEEL_SHOULDER_LEAN, -KNEEL_SHOULDER_CLAMP, KNEEL_SHOULDER_CLAMP)
+	_apply_rotation_x("ElbowL", KNEEL_ELBOW_BEND, 0.0, KNEEL_ELBOW_CLAMP)
+	_apply_rotation_x("ElbowR", KNEEL_ELBOW_BEND, 0.0, KNEEL_ELBOW_CLAMP)
+
+	_apply_rotation_x("Torso", KNEEL_TORSO_LEAN, -KNEEL_TORSO_CLAMP, KNEEL_TORSO_CLAMP)
+	_apply_rotation_x("Head", KNEEL_HEAD_TILT, -KNEEL_HEAD_CLAMP, KNEEL_HEAD_CLAMP)
+
+
 func _apply_rotation_x(joint_name: String, angle: float, clamp_min: float, clamp_max: float) -> void:
 	var joint: Node3D = _joints.get(joint_name)
 	if joint == null:

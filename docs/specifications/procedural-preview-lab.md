@@ -2,7 +2,9 @@
 
 **Status: build order step 1 implemented.** Formalizes and extends the dev harness at [scripts/dev/character_preview.gd](../../scripts/dev/character_preview.gd) into a reusable system for all procedural visuals, not just characters. Nothing here changes [procedural-character-spec.md](../procedural-character-spec.md)'s rig/locomotion architecture; the "character animation contract" section below refactors *how* locomotion is driven for preview purposes, not the walk-cycle math itself.
 
-[Build order](#build-order) step 1 (stabilize the existing batch harness) is done: [procedural_locomotion.gd](../../scripts/character/procedural_locomotion.gd) exposes a pure `apply_pose()`/`set_exact_pose()` evaluator, [character_preview.gd](../../scripts/dev/character_preview.gd) supports deterministic pose capture, fit-to-subject camera views, the `neutral_review`/`silhouette`/`gameplay_camera` stage presets, a ground grid, and a batch mode driven by named [PreviewCase](../../scripts/dev/preview_case.gd) resources (see [resources/preview_cases/](../../resources/preview_cases/) for examples) that write a PNG + JSON metadata sidecar per case. Steps 2-5 (interactive lab UI, subject-adapter extraction, tree adapter) are not started. See `AGENTS.md`'s Commands section for copy-pasteable invocations.
+[Build order](#build-order) step 1 (stabilize the existing batch harness) is done: [procedural_locomotion.gd](../../scripts/character/procedural_locomotion.gd) exposes a pure `apply_pose()`/`set_exact_pose()` evaluator, [character_preview.gd](../../scripts/dev/character_preview.gd) supports deterministic pose capture, fit-to-subject camera views, the `neutral_review`/`silhouette`/`gameplay_camera` stage presets, a ground grid, and a batch mode driven by named [PreviewCase](../../scripts/dev/preview_case.gd) resources (see [resources/preview_cases/](../../resources/preview_cases/) for examples) that write a PNG + JSON metadata sidecar per case. Steps 2, 4, and 5 (interactive lab UI, subject-adapter extraction, tree adapter) are not started; step 3 has one static pose from the appendix below (`kneel_one_knee`) implemented. See `AGENTS.md`'s Commands section for copy-pasteable invocations.
+
+`PreviewCase.pose` (`LOCOMOTION` / `KNEEL_ONE_KNEE`) selects between the existing phase-driven locomotion evaluator and a static held pose. Holding a static pose relies on `CharacterModel` suspending its automatic per-physics-frame locomotion update while the pose is active (`_pose_held` in `character_builder.gd`) — without that, the next physics tick silently re-ran `ProceduralLocomotion.update()` with the model's default zero-velocity/grounded state and overwrote whatever `set_exact_pose()`/the pose call had just set, which is also why non-zero `pose_speed` preview cases (e.g. `responder_default_walk_contact`) rendered as an idle stance before this fix.
 
 ## Purpose
 
@@ -137,7 +139,7 @@ Applied to [scripts/dev/character_preview.gd](../../scripts/dev/character_previe
 
 1. ✅ Stabilize the existing batch harness: deterministic pose phase, stage presets, camera views, metadata sidecar.
 2. ⬜ Add the interactive Character Lab: working copy, parameter panel, pose scrubber, save-as, and comparison mode.
-3. 🟡 Add preview cases and baseline captures for the responder appearances. Four example `PreviewCase` resources exist ([resources/preview_cases/](../../resources/preview_cases/)); no baseline images are checked in yet and there is no diffing/comparison-sheet tooling — see [Visual regression workflow](#visual-regression-workflow).
+3. 🟡 Add preview cases and baseline captures for the responder appearances. Five example `PreviewCase` resources exist ([resources/preview_cases/](../../resources/preview_cases/)), including one static-pose case (`responder_kneel_one_knee`); no baseline images are checked in yet and there is no diffing/comparison-sheet tooling — see [Visual regression workflow](#visual-regression-workflow).
 4. ⬜ Extract the shared stage and adapter contract.
 5. ⬜ Add a tree adapter only once the tree generator exists.
 
@@ -182,7 +184,7 @@ Define a small, scenario-driven pose set for responders and casualties. Poses us
 #### Interaction poses
 
 - `crouch_inspect` — bent knees and hips, forward torso tilt. Reserve player collision resizing for a later movement feature.
-- `kneel_one_knee` — primary treatment/assessment pose; one knee down, one foot planted.
+- `kneel_one_knee` — primary treatment/assessment pose; one knee down, one foot planted. **Implemented** as a hardcoded joint-delta evaluator (`ProceduralLocomotion.apply_kneel_one_knee_pose()`), not the general `CharacterPose` resource contract below. Joint-rotation-only, per this category's "static joint pose" implementation — it does not lower the model root, so the kneeling knee/planted foot sit visibly above the ground plane rather than making floor contact; see the rig-limitation note on `apply_kneel_one_knee_pose()`. Closing that gap needs a root offset, which this pass deliberately left as an open, flagged question (camera-pivot height, collider) rather than deciding unilaterally.
 - `kneel_both` — stable low interaction pose for prolonged tasks.
 - `reach_down` — standing or kneeling overlay used while interacting with equipment or a casualty.
 - `point` / `signal` — later gesture overlay; useful for multiplayer readability.
@@ -209,7 +211,7 @@ Define a small, scenario-driven pose set for responders and casualties. Poses us
 
 **First rescue-scenario pass**
 
-- `kneel_one_knee`
+- `kneel_one_knee` — implemented, see note above
 - `reach_down`
 - `sit_ground`
 - `supine`
@@ -267,7 +269,7 @@ Add these named preview cases:
 - `responder_standing_front`
 - `responder_walk_contact_left`
 - `responder_airborne`
-- `responder_kneel_one_knee`
+- `responder_kneel_one_knee` — added ([resources/preview_cases/responder_kneel_one_knee.tres](../../resources/preview_cases/responder_kneel_one_knee.tres)), three-quarter view only so far; still needs front/side/gameplay-camera companion cases per the line below.
 - `casualty_sit_ground`
 - `casualty_supine`
 - `casualty_prone`
