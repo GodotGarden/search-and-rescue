@@ -1,5 +1,7 @@
 extends Node3D
 
+const ProceduralTree := preload("res://scripts/world/procedural_tree.gd")
+
 const GROUND_COLOR := Color("668a4e")
 const TRAIL_COLOR := Color("b99c6b")
 const ROCK_COLOR := Color("56636a")
@@ -92,29 +94,29 @@ func _add_lake_shoreline() -> void:
 		_add_shore_rock("LakeEastRock%d" % index, Vector3(-15.0 + random.randf_range(-1.5, 1.5), 1.3, vertical_position), random)
 
 
-func _add_shore_rock(label: String, position: Vector3, random: RandomNumberGenerator) -> void:
+func _add_shore_rock(label: String, world_position: Vector3, random: RandomNumberGenerator) -> void:
 	# Each rock overlaps its neighbors so there is no walkable gap around the lake.
 	var size := Vector3(random.randf_range(10.0, 12.0), random.randf_range(2.4, 4.0), random.randf_range(8.0, 10.0))
-	_add_box(label, position, size, ROCK_COLOR)
+	_add_box(label, world_position, size, ROCK_COLOR)
 
 
-func _add_slope(label: String, position: Vector3, size: Vector3, angle_degrees: float, color: Color) -> void:
-	var node := _add_box(label, position, size, color)
+func _add_slope(label: String, world_position: Vector3, size: Vector3, angle_degrees: float, color: Color) -> void:
+	var node := _add_box(label, world_position, size, color)
 	node.get_parent().rotation_degrees.x = angle_degrees
 
 
-func _add_box(label: String, position: Vector3, size: Vector3, color: Color, has_collision := true) -> MeshInstance3D:
+func _add_box(label: String, world_position: Vector3, size: Vector3, color: Color, has_collision := true) -> MeshInstance3D:
 	var parent: Node3D = self
 	if has_collision:
 		var body := StaticBody3D.new()
 		body.name = "%sCollision" % label
-		body.position = position
+		body.position = world_position
 		add_child(body)
 		parent = body
 	else:
 		var visual_parent := Node3D.new()
 		visual_parent.name = "%sVisual" % label
-		visual_parent.position = position
+		visual_parent.position = world_position
 		add_child(visual_parent)
 		parent = visual_parent
 	var mesh_instance := MeshInstance3D.new()
@@ -136,10 +138,10 @@ func _add_box(label: String, position: Vector3, size: Vector3, color: Color, has
 	return mesh_instance
 
 
-func _add_label(text_value: String, position: Vector3) -> void:
+func _add_label(text_value: String, world_position: Vector3) -> void:
 	var label := Label3D.new()
 	label.text = text_value
-	label.position = position
+	label.position = world_position
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.pixel_size = 0.01
 	label.outline_size = 3
