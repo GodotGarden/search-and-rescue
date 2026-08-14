@@ -38,13 +38,13 @@ For any player-facing change, confirm:
 - A scene restart resets important state.
 - The player cannot easily get stuck in terrain, UI, or an incomplete objective state.
 
-For the complete two-player test contract, use [Multiplayer MVP](multiplayer-mvp.md).
+For the current scaffold's repeatable host/join checks, use the [two-player LAN test guide](lan-multiplayer-testing.md). For the complete two-player incident contract, use [Multiplayer MVP](multiplayer-mvp.md).
 
 For an art import, also use the checklists in [Asset and model conventions](assets-and-models.md) and [Goxel workflow](goxel-workflow.md).
 
 ## Third-party add-ons
 
-Add an add-on only to solve a present, understood problem. Before adding one, record its source/version/license in the asset register, verify Godot 4.6 compatibility, and make a clean commit. Prefer native Godot features for the first slice.
+Add an add-on only to solve a present, understood problem. Before adding one, record its source/version/license in the asset register, verify Godot 4.7 compatibility, and make a clean commit. Prefer native Godot features for the first slice.
 
 ## Rendering checks
 

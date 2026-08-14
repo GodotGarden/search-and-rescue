@@ -2,7 +2,7 @@
 
 A low-poly, third-person 3D co-op search-and-rescue game set across bounded island regions. The first goal is a small but convincing two-player rescue loop: receive an incident, travel and search outdoors, locate a casualty or hazard, resolve it, and return to complete the call together.
 
-This is a **Godot 4.6, GDScript-only** project. C# can be added later if a concrete need emerges.
+This is a **Godot 4.7, GDScript-only** project. C# can be added later if a concrete need emerges.
 
 ## Prototype focus
 
@@ -20,14 +20,25 @@ See [specification.md](specification.md) for the product scope and [roadmap.md](
 
 ## Quick start
 
-1. Install the standard Godot Engine **4.6** editor and Git.
+1. Install the standard Godot Engine **4.7** editor and Git.
 2. Create or open the Godot project in this repository.
-3. Open `project.godot`, then set the main scene when the first playable scene is added.
-4. Run the project with <kbd>F6</kbd> for the current scene or <kbd>F5</kbd> for the game.
+3. Open `project.godot` and run the game with <kbd>F5</kbd>.
 
 Use Forward+ in Project Settings for the intended desktop look. Develop and test on machines with current graphics hardware that supports Godot's RenderingDevice-based renderers.
 
-At the first scaffold checkpoint, this should be enough to open a simple island test scene and control a third-person responder.
+The game opens maximized and is HiDPI-aware on macOS. Its 1280×720 logical viewport uses Godot's `canvas_items` stretch mode, so the UI and scene scale with the available display size.
+
+## Current scaffold demo
+
+The current main scene is a two-player LAN third-person walking demo. On the first machine, select **Host LAN session**. On the second machine, enter the host machine's LAN IP address and select **Join session**. Both machines use UDP port `8910`; allow it through the host firewall if needed.
+
+Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The centre reticle is the interaction point. Press <kbd>1</kbd>, <kbd>2</kbd>, or <kbd>3</kbd> to equip a toolbelt slot, then use <kbd>E</kbd>: hold it for binoculars or press it to open the map/compass. <kbd>Escape</kbd> closes a map or compass view (or releases the mouse); <kbd>F1</kbd> toggles mouse capture. Use the on-screen **End session** control to return the host—and connected client—to the session menu.
+
+Enter a responder name before hosting or joining. Each responder carries a lightweight fixed toolbelt: binoculars, a map, and a magnetic compass. The map shows the current blockout, your position, the rescue centre, and the trail destination. This three-slot hotbar is deliberately not a general inventory or loadout system yet.
+
+For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
+
+Follow the [two-player LAN test guide](docs/lan-multiplayer-testing.md) for the full repeatable acceptance pass and troubleshooting steps.
 
 ## Documentation map
 
@@ -37,6 +48,7 @@ At the first scaffold checkpoint, this should be enough to open a simple island 
 - [Technical scaffold requirements](docs/technical-scaffold-requirements.md) — implementation handoff for the initial terrain, third-person, and LAN co-op foundation.
 - [Gameplay and progression](docs/gameplay-and-progression.md) — the rescue interaction, loadout, and capability-unlock model.
 - [Multiplayer MVP](docs/multiplayer-mvp.md) — the deliberately narrow two-player host/join contract.
+- [Two-player LAN test guide](docs/lan-multiplayer-testing.md) — setup, acceptance checks, and troubleshooting for the current scaffold.
 - [Asset and model conventions](docs/assets-and-models.md) — the handoff contract for low-poly art.
 - [Goxel workflow](docs/goxel-workflow.md) — the source-to-Godot path for voxel models.
 - [Visual direction](docs/visual-direction.md) — the island SAR north star, layered terrain, POIs, and ambience.

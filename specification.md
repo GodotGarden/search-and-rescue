@@ -153,7 +153,7 @@ Future incident possibilities: stranded kayaker, cliffside callout, storm damage
 
 ## Acceptance criteria for the first slice
 
-- The project opens and runs in the standard Godot 4.6 editor.
+- The project opens and runs in the standard Godot 4.7 editor.
 - The intended build runs in Forward+ on the team's target desktop machines.
 - A third-person character can traverse the test area with a usable camera.
 - One player can host and a second player can join the same local-network session.

@@ -1,0 +1,61 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/multiplayer/session_menu.gd" id="1_menu"]
+
+[node name="SessionMenu" type="CenterContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(440, 0)
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Panel/Margin/Content"]
+theme_override_font_sizes/font_size = 28
+text = "Search & Rescue"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Panel/Margin/Content"]
+text = "Two-player LAN walking demo"
+horizontal_alignment = 1
+
+[node name="NameLabel" type="Label" parent="Panel/Margin/Content"]
+text = "Responder name"
+
+[node name="NameInput" type="LineEdit" parent="Panel/Margin/Content"]
+max_length = 18
+placeholder_text = "Responder"
+
+[node name="HostButton" type="Button" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 42)
+text = "Host LAN session"
+
+[node name="Divider" type="HSeparator" parent="Panel/Margin/Content"]
+
+[node name="AddressLabel" type="Label" parent="Panel/Margin/Content"]
+text = "Host IP address"
+
+[node name="AddressInput" type="LineEdit" parent="Panel/Margin/Content"]
+placeholder_text = "192.168.1.42"
+text = "127.0.0.1"
+
+[node name="JoinButton" type="Button" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 42)
+text = "Join session"
+
+[node name="StatusLabel" type="Label" parent="Panel/Margin/Content"]
+custom_minimum_size = Vector2(0, 56)
+autowrap_mode = 2
+text = "Ready."

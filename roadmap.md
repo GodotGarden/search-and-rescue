@@ -4,7 +4,7 @@ The roadmap is ordered by learning value. Finish and play each milestone before 
 
 ## M0 — Project foundation
 
-**Goal:** Open a clean, GDScript-only Godot 4.6 project and establish the smallest reusable structure.
+**Goal:** Open a clean, GDScript-only Godot 4.7 project and establish the smallest reusable structure.
 
 - Add the directory scaffold and documentation.
 - Set basic input actions and project display settings.
@@ -27,6 +27,8 @@ The roadmap is ordered by learning value. Finish and play each milestone before 
 - Keep the first small lake island visible as a future access goal, not a required location in the hiker rescue.
 - Compose the first inland-island vista with layered forest, hills or cliffs, pines, a creek/gorge, and one distant POI such as a lookout, medical center, or village silhouette.
 - Minimal contextual HUD: current objective, interaction prompt, selected equipment, and limited compass/minimap orientation. Do not expose undiscovered incident information.
+- A fixed three-slot navigation hotbar for binoculars, map, and compass is permitted as an M1 verification aid; defer generic inventory and loadouts to M3.5.
+- Let players look around while the enlarged compass is open, so they can orient against the landscape without closing the tool view or surrendering camera control.
 
 **Done when:** two players can comfortably travel from the rescue station to a distant trail point, see each other move, and do not suffer duplicate spawns, camera collisions, or stuck states.
 
