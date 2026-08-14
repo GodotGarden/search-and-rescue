@@ -34,6 +34,8 @@ Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to
 
 For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
 
+Follow the [two-player LAN test guide](docs/lan-multiplayer-testing.md) for the full repeatable acceptance pass and troubleshooting steps.
+
 ## Documentation map
 
 - [Specification](specification.md) — playable goals, boundaries, and acceptance criteria.
@@ -42,6 +44,7 @@ For a quick same-machine check, host in one desktop instance and join `127.0.0.1
 - [Technical scaffold requirements](docs/technical-scaffold-requirements.md) — implementation handoff for the initial terrain, third-person, and LAN co-op foundation.
 - [Gameplay and progression](docs/gameplay-and-progression.md) — the rescue interaction, loadout, and capability-unlock model.
 - [Multiplayer MVP](docs/multiplayer-mvp.md) — the deliberately narrow two-player host/join contract.
+- [Two-player LAN test guide](docs/lan-multiplayer-testing.md) — setup, acceptance checks, and troubleshooting for the current scaffold.
 - [Asset and model conventions](docs/assets-and-models.md) — the handoff contract for low-poly art.
 - [Goxel workflow](docs/goxel-workflow.md) — the source-to-Godot path for voxel models.
 - [Visual direction](docs/visual-direction.md) — the island SAR north star, layered terrain, POIs, and ambience.

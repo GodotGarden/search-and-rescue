@@ -38,7 +38,7 @@ For any player-facing change, confirm:
 - A scene restart resets important state.
 - The player cannot easily get stuck in terrain, UI, or an incomplete objective state.
 
-For the complete two-player test contract, use [Multiplayer MVP](multiplayer-mvp.md).
+For the current scaffold's repeatable host/join checks, use the [two-player LAN test guide](lan-multiplayer-testing.md). For the complete two-player incident contract, use [Multiplayer MVP](multiplayer-mvp.md).
 
 For an art import, also use the checklists in [Asset and model conventions](assets-and-models.md) and [Goxel workflow](goxel-workflow.md).
 
