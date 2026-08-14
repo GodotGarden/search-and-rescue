@@ -53,7 +53,23 @@ func update(delta: float, horizontal_velocity: Vector3, grounded: bool) -> void:
 	# Phase advances by distance travelled, not raw time, so feet don't slide/moonwalk at a given speed.
 	if grounded:
 		_gait_phase = fmod(_gait_phase + speed * delta * STRIDE_RATE, TAU)
+	apply_pose(_gait_phase, speed, _idle_phase, _airborne_blend)
 
+
+## Sets an exact, reproducible pose in one call: no delta-time integration or airborne blend ramp.
+## For preview/capture tooling — see "Character animation contract" in
+## docs/specifications/procedural-preview-lab.md. gait_phase and idle_phase are radians (0..TAU).
+func set_exact_pose(gait_phase: float, speed: float, grounded: bool, idle_phase: float = 0.0) -> void:
+	_gait_phase = fmod(gait_phase, TAU)
+	_idle_phase = fmod(idle_phase, TAU)
+	_airborne_blend = 0.0 if grounded else 1.0
+	apply_pose(_gait_phase, speed, _idle_phase, _airborne_blend)
+
+
+## Pure: poses every joint from an explicit phase/speed/blend state, no time integration or
+## internal state mutation beyond the joints themselves. Shared by update() (gameplay, phase
+## accumulated per-frame) and set_exact_pose() (preview tooling, phase supplied directly).
+func apply_pose(gait_phase: float, speed: float, idle_phase: float, airborne_blend: float) -> void:
 	var walk_factor := clampf(speed / WALK_AMPLITUDE_SPEED, 0.0, 1.0)
 	var run_factor := clampf((speed - WALK_AMPLITUDE_SPEED) / (RUN_AMPLITUDE_SPEED - WALK_AMPLITUDE_SPEED), 0.0, 1.0)
 	var idle_factor := 1.0 - clampf(speed / IDLE_SWAY_SPEED, 0.0, 1.0)
@@ -63,8 +79,8 @@ func update(delta: float, horizontal_velocity: Vector3, grounded: bool) -> void:
 	var shoulder_amplitude := lerpf(SHOULDER_SWING_WALK, SHOULDER_SWING_RUN, run_factor) * walk_factor
 	var elbow_amplitude := lerpf(ELBOW_BEND_WALK, ELBOW_BEND_RUN, run_factor) * walk_factor
 
-	var left_swing := sin(_gait_phase)
-	var right_swing := sin(_gait_phase + PI)
+	var left_swing := sin(gait_phase)
+	var right_swing := sin(gait_phase + PI)
 
 	_apply_rotation_x("HipL", left_swing * hip_amplitude, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
 	_apply_rotation_x("HipR", right_swing * hip_amplitude, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
@@ -77,21 +93,21 @@ func update(delta: float, horizontal_velocity: Vector3, grounded: bool) -> void:
 	_apply_rotation_x("ElbowL", maxf(left_swing, 0.0) * elbow_amplitude, 0.0, ELBOW_BEND_CLAMP)
 	_apply_rotation_x("ElbowR", maxf(right_swing, 0.0) * elbow_amplitude, 0.0, ELBOW_BEND_CLAMP)
 
-	var sway := sin(_idle_phase) * idle_factor
+	var sway := sin(idle_phase) * idle_factor
 	_apply_rotation_x("Torso", sway * TORSO_IDLE_SWAY, -TORSO_IDLE_SWAY, TORSO_IDLE_SWAY)
 	_apply_rotation_x("Head", -sway * HEAD_IDLE_SWAY, -HEAD_IDLE_SWAY, HEAD_IDLE_SWAY)
 
-	if _airborne_blend > 0.0:
-		_blend_airborne()
+	if airborne_blend > 0.0:
+		_blend_airborne(airborne_blend)
 
 
-func _blend_airborne() -> void:
-	_lerp_rotation_x("HipL", AIRBORNE_HIP_LIFT, _airborne_blend, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
-	_lerp_rotation_x("HipR", AIRBORNE_HIP_LIFT, _airborne_blend, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
-	_lerp_rotation_x("KneeL", AIRBORNE_KNEE_BEND, _airborne_blend, 0.0, KNEE_BEND_CLAMP)
-	_lerp_rotation_x("KneeR", AIRBORNE_KNEE_BEND, _airborne_blend, 0.0, KNEE_BEND_CLAMP)
-	_lerp_rotation_x("ShoulderL", AIRBORNE_SHOULDER_LIFT, _airborne_blend, -SHOULDER_SWING_CLAMP, SHOULDER_SWING_CLAMP)
-	_lerp_rotation_x("ShoulderR", AIRBORNE_SHOULDER_LIFT, _airborne_blend, -SHOULDER_SWING_CLAMP, SHOULDER_SWING_CLAMP)
+func _blend_airborne(airborne_blend: float) -> void:
+	_lerp_rotation_x("HipL", AIRBORNE_HIP_LIFT, airborne_blend, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
+	_lerp_rotation_x("HipR", AIRBORNE_HIP_LIFT, airborne_blend, -HIP_SWING_CLAMP, HIP_SWING_CLAMP)
+	_lerp_rotation_x("KneeL", AIRBORNE_KNEE_BEND, airborne_blend, 0.0, KNEE_BEND_CLAMP)
+	_lerp_rotation_x("KneeR", AIRBORNE_KNEE_BEND, airborne_blend, 0.0, KNEE_BEND_CLAMP)
+	_lerp_rotation_x("ShoulderL", AIRBORNE_SHOULDER_LIFT, airborne_blend, -SHOULDER_SWING_CLAMP, SHOULDER_SWING_CLAMP)
+	_lerp_rotation_x("ShoulderR", AIRBORNE_SHOULDER_LIFT, airborne_blend, -SHOULDER_SWING_CLAMP, SHOULDER_SWING_CLAMP)
 
 
 func _apply_rotation_x(joint_name: String, angle: float, clamp_min: float, clamp_max: float) -> void:
