@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_appearance")
-height_m = 2.0
+height_m = 1.88
 build = 0.95
 shoulder_hip_ratio = 1.35
 head_scale = 0.85
@@ -14,5 +14,6 @@ hair_color = Color(0.08, 0.06, 0.05, 1)
 head_equipment = 2
 clothing_primary_color = Color(0.28, 0.24, 0.22, 1)
 clothing_secondary_color = Color(0.13, 0.12, 0.11, 1)
+accent_color = Color(0.96, 0.75, 0.35, 1)
 variant_seed = 303
-generator_version = 1
+generator_version = 2

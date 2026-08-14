@@ -35,12 +35,18 @@ const MAX_HEAD_SCALE := 1.25
 @export var head_equipment: HeadEquipment = HeadEquipment.NONE
 @export var clothing_primary_color: Color = Color("2c4a63")
 @export var clothing_secondary_color: Color = Color("1c2c2c")
+## Safety accent, repeated across chest, sleeves, and lower legs. See docs/character-appearance-visual-design.md.
+@export var accent_color: Color = Color("f2c318")
 
 ## Host/internal only for this milestone: not exposed as a player-facing customization control.
+## Reserved: character_builder.gd does not yet derive any deterministic variation from this —
+## every field above is still set explicitly per appearance. Wire this up before relying on it
+## to produce a crowd of distinct NPCs from one appearance.
 @export var variant_seed: int = 0
 
-## Bumped when builder logic changes shape in a way that would make an old seed produce a different result.
-@export var generator_version: int = 1
+## Bumped when builder logic changes shape in a way that would make an old seed produce a different
+## result. Reserved alongside variant_seed for the same reason: not yet consumed by the builder.
+@export var generator_version: int = 2
 
 
 func to_payload() -> Dictionary:
@@ -55,6 +61,7 @@ func to_payload() -> Dictionary:
 		"head_equipment": head_equipment,
 		"clothing_primary_color": clothing_primary_color,
 		"clothing_secondary_color": clothing_secondary_color,
+		"accent_color": accent_color,
 		"variant_seed": variant_seed,
 		"generator_version": generator_version,
 	}
@@ -72,6 +79,7 @@ static func from_payload(payload: Dictionary) -> CharacterAppearance:
 	appearance.head_equipment = payload.get("head_equipment", appearance.head_equipment)
 	appearance.clothing_primary_color = payload.get("clothing_primary_color", appearance.clothing_primary_color)
 	appearance.clothing_secondary_color = payload.get("clothing_secondary_color", appearance.clothing_secondary_color)
+	appearance.accent_color = payload.get("accent_color", appearance.accent_color)
 	appearance.variant_seed = payload.get("variant_seed", appearance.variant_seed)
 	appearance.generator_version = payload.get("generator_version", appearance.generator_version)
 	return appearance

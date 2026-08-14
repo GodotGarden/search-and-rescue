@@ -1,3 +1,6 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Dev-tool output (e.g. scripts/dev/character_preview.gd screenshots)
+/dev-output/

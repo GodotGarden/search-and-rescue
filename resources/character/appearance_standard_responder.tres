@@ -14,5 +14,6 @@ hair_color = Color(0.23, 0.16, 0.12, 1)
 head_equipment = 0
 clothing_primary_color = Color(0.17, 0.29, 0.39, 1)
 clothing_secondary_color = Color(0.11, 0.17, 0.17, 1)
+accent_color = Color(0.92, 0.5, 0.1, 1)
 variant_seed = 202
-generator_version = 1
+generator_version = 2
