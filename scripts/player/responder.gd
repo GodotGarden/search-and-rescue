@@ -141,8 +141,11 @@ func submit_state(position_value: Vector3, yaw: float, movement_velocity: Vector
 	relay_state.rpc(position_value, yaw, movement_velocity)
 
 
-@rpc("authority", "call_remote", "unreliable")
+@rpc("any_peer", "call_remote", "unreliable")
 func relay_state(position_value: Vector3, yaw: float, movement_velocity: Vector3) -> void:
+	# Player nodes are client-owned, but only the host may relay network state.
+	if multiplayer.get_remote_sender_id() != 1:
+		return
 	_apply_network_state(position_value, yaw, movement_velocity)
 
 
