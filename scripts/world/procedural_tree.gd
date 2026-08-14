@@ -5,11 +5,11 @@ const TRUNK_COLORS := [Color("5f432e"), Color("704c2f"), Color("4e392c")]
 const NEEDLE_COLORS := [Color("28533f"), Color("326347"), Color("3d704d"), Color("214936")]
 
 
-static func create(seed: int) -> ProceduralTree:
+static func create(seed_value: int) -> ProceduralTree:
 	var tree := ProceduralTree.new()
-	tree.name = "GeneratedTree_%d" % seed
+	tree.name = "GeneratedTree_%d" % seed_value
 	var random := RandomNumberGenerator.new()
-	random.seed = seed
+	random.seed = seed_value
 	tree.rotation.y = random.randf_range(0.0, TAU)
 	tree._build_pine(random)
 	return tree
