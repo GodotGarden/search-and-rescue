@@ -20,6 +20,14 @@ var _horizontal_velocity := Vector3.ZERO
 var _grounded := true
 var _silhouette_enabled := false
 var _silhouette_material: StandardMaterial3D
+## True after set_exact_pose()/set_kneel_one_knee_pose() and before the next
+## set_locomotion_input() call. Suspends the automatic per-physics-frame _locomotion.update() below
+## so a held/static pose isn't overwritten one tick later by update() running with whatever stale
+## _horizontal_velocity/_grounded this model happens to hold (zero/true by default — exactly the
+## idle pose, which silently clobbered both the existing pose_speed preview cases and the new
+## kneel_one_knee pose before this flag existed). Real gameplay is unaffected: responder.gd calls
+## set_locomotion_input() every physics frame, which clears this immediately.
+var _pose_held := false
 
 
 func _ready() -> void:
@@ -27,7 +35,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _locomotion != null:
+	if _locomotion != null and not _pose_held:
 		_locomotion.update(delta, _horizontal_velocity, _grounded)
 
 
@@ -35,6 +43,7 @@ func _physics_process(delta: float) -> void:
 func set_locomotion_input(horizontal_velocity: Vector3, grounded: bool) -> void:
 	_horizontal_velocity = horizontal_velocity
 	_grounded = grounded
+	_pose_held = false
 
 
 ## Local/remote disambiguation is a rendering layer applied on top of appearance, not a cosmetic field.
@@ -49,6 +58,16 @@ func set_identity_color(color: Color) -> void:
 func set_exact_pose(gait_phase_normalized: float, speed: float, grounded: bool, idle_phase_normalized: float = 0.0) -> void:
 	if _locomotion != null:
 		_locomotion.set_exact_pose(gait_phase_normalized * TAU, speed, grounded, idle_phase_normalized * TAU)
+		_pose_held = true
+
+
+## Static "one knee down" interaction pose — see the rig-limitation note on
+## ProceduralLocomotion.apply_kneel_one_knee_pose() (does not lower the model root, so the
+## kneeling knee will not literally touch the ground plane).
+func set_kneel_one_knee_pose(kneeling_leg_left: bool = false) -> void:
+	if _locomotion != null:
+		_locomotion.apply_kneel_one_knee_pose(kneeling_leg_left)
+		_pose_held = true
 
 
 ## Flat, unshaded, single-color materials on every mesh — for silhouette/proportion review.
