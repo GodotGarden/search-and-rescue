@@ -36,7 +36,7 @@ text = "Level: Inland Island Test"
 text = "Objective: Reach the trail marker"
 
 [node name="ToolbeltLabel" type="Label" parent="Readout/Margin/Rows"]
-text = "Toolbelt: binoculars and map"
+text = "Toolbelt: binoculars, map, magnetic compass"
 
 [node name="DebugLabel" type="Label" parent="Readout/Margin/Rows"]
 text = "Players: 0"

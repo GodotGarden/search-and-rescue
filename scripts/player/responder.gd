@@ -14,6 +14,7 @@ const NETWORK_SEND_INTERVAL := 1.0 / 15.0
 @onready var name_tag: Label3D = $NameTag
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
+@onready var magnetic_compass: Node3D = $Toolbelt/MagneticCompass
 
 var _look_pitch := -0.2
 var _network_position := Vector3.ZERO
@@ -48,6 +49,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Counter-rotate the belt compass so its needle remains aligned with world north.
+	magnetic_compass.rotation.y = -global_rotation.y
 	if not is_multiplayer_authority():
 		global_position = global_position.lerp(_network_position, minf(delta * 12.0, 1.0))
 		rotation.y = lerp_angle(rotation.y, _network_yaw, minf(delta * 12.0, 1.0))

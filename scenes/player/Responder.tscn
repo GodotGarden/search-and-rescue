@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/responder.gd" id="1_responder"]
 
@@ -50,6 +50,36 @@ size = Vector3(0.24, 0.02, 0.18)
 albedo_color = Color(0.78, 0.78, 0.58, 1)
 roughness = 1.0
 
+[sub_resource type="CylinderMesh" id="CylinderMesh_compass_case"]
+top_radius = 0.16
+bottom_radius = 0.16
+height = 0.07
+radial_segments = 10
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="Material_compass_case"]
+albedo_color = Color(0.13, 0.16, 0.16, 1)
+metallic = 0.45
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_compass_face"]
+top_radius = 0.125
+bottom_radius = 0.125
+height = 0.012
+radial_segments = 10
+rings = 1
+
+[sub_resource type="StandardMaterial3D" id="Material_compass_face"]
+albedo_color = Color(0.86, 0.84, 0.67, 1)
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_compass_needle"]
+size = Vector3(0.035, 0.018, 0.19)
+
+[sub_resource type="StandardMaterial3D" id="Material_compass_needle"]
+albedo_color = Color(0.78, 0.08, 0.05, 1)
+roughness = 0.6
+
 [node name="Responder" type="CharacterBody3D"]
 script = ExtResource("1_responder")
 
@@ -97,6 +127,23 @@ material_override = SubResource("Material_pouch")
 position = Vector3(0, 0.15, 0)
 mesh = SubResource("BoxMesh_map")
 material_override = SubResource("Material_map")
+
+[node name="MagneticCompass" type="Node3D" parent="Toolbelt"]
+position = Vector3(0.42, 0.04, 0.04)
+
+[node name="Case" type="MeshInstance3D" parent="Toolbelt/MagneticCompass"]
+mesh = SubResource("CylinderMesh_compass_case")
+material_override = SubResource("Material_compass_case")
+
+[node name="Face" type="MeshInstance3D" parent="Toolbelt/MagneticCompass"]
+position = Vector3(0, 0.042, 0)
+mesh = SubResource("CylinderMesh_compass_face")
+material_override = SubResource("Material_compass_face")
+
+[node name="Needle" type="MeshInstance3D" parent="Toolbelt/MagneticCompass"]
+position = Vector3(0, 0.058, 0)
+mesh = SubResource("BoxMesh_compass_needle")
+material_override = SubResource("Material_compass_needle")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 position = Vector3(0, 1.45, 0)

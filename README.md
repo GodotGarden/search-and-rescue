@@ -34,7 +34,7 @@ The current main scene is a two-player LAN third-person walking demo. On the fir
 
 Use <kbd>WASD</kbd> to move, <kbd>Shift</kbd> to sprint, and <kbd>Space</kbd> to jump. The mouse controls the orbit camera. <kbd>Escape</kbd> releases/captures the mouse; use the on-screen **End session** control to return the host—and connected client—to the session menu.
 
-Each responder currently carries a visual toolbelt with binoculars and a map pouch. These are placeholder kit props only; selecting, using, and choosing equipment begins at the later loadout milestone.
+Each responder currently carries a visual toolbelt with binoculars, a map pouch, and a magnetic compass. The compass needle remains aligned to world north as the responder turns. These are placeholder kit props only; selecting, using, and choosing equipment begins at the later loadout milestone.
 
 For a quick same-machine check, host in one desktop instance and join `127.0.0.1` from a second instance. Also test across two LAN machines before considering the networking checkpoint complete.
 
