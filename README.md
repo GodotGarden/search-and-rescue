@@ -20,7 +20,7 @@ See [specification.md](specification.md) for the product scope and [roadmap.md](
 
 ## Quick start
 
-1. Install the standard Godot Engine **4.6** editor and Git.
+1. Install the standard Godot Engine **4.7** editor and Git.
 2. Create or open the Godot project in this repository.
 3. Open `project.godot` and run the game with <kbd>F5</kbd>.
 

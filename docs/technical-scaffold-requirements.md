@@ -16,7 +16,7 @@ For gameplay scope and acceptance criteria, see the [Specification](../specifica
 - Two players only: one LAN host and one direct-IP joining client. No accounts, matchmaking, internet relay, dedicated server, reconnect, or host migration.
 - The host is authoritative for the session, level choice, spawn roster, and future shared mission facts.
 - Use placeholder geometry, materials, and labels. The scaffold must not depend on finished Goxel art.
-- Keep all initial code and scenes easy to delete or replace. Do not add persistence, progression, vehicles, swimming, boating, fire, casualty logic, or elaborate UI yet.
+- Keep all initial code and scenes easy to delete or replace. Do not add persistence, progression, vehicles, swimming, boating, fire, casualty logic, or elaborate UI yet. The fixed M1 navigation hotbar (binoculars, map, and compass) is a verification aid, not a generic inventory system.
 
 ## Required repository layout
 
@@ -167,7 +167,7 @@ Make a small, separately reviewable change or commit after every checkpoint.
 
 - Hiker/casualty, dispatch, equipment selection, interaction, extraction, and mission completion. These begin after this foundation is reliable.
 - Vehicles, helicopter, hoist, boats, swimming, diving, water physics, and water-rescue incidents.
-- Inventory, loadouts, progression, saving, achievements, or a generic item system.
+- Inventory, loadouts, progression, saving, achievements, or a generic item system. The fixed three-slot navigation hotbar is an M1 exception; it must not grow into an inventory framework before the rescue loop is proven.
 - Finished terrain, procedural foliage, navigation meshes, AI pathfinding, animation rigs, audio systems, or weather simulation.
 - Matchmaking, internet multiplayer, voice chat, more than two players, host migration, or dedicated servers.
 

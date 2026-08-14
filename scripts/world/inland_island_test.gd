@@ -27,8 +27,9 @@ func _build_blockout() -> void:
 	_add_box("HealthCentre", Vector3(-63, 4, -38), Vector3(20, 8, 12), Color("e6e2d2"))
 	_add_box("Meadow", Vector3(12, 0.12, -7), Vector3(110, 0.24, 95), Color("8ead5c"), false)
 	_add_box("Trail", Vector3(25, 0.3, -15), Vector3(5, 0.12, 100), TRAIL_COLOR, false)
-	_add_box("LakeWaterBoundary", Vector3(-47, 0.05, 65), Vector3(64, 0.5, 48), WATER_COLOR)
+	_add_box("LakeWater", Vector3(-47, 0.05, 65), Vector3(64, 0.5, 48), WATER_COLOR, false)
 	_add_box("LakeIsland", Vector3(-47, 1.6, 65), Vector3(15, 3, 12), Color("69884e"))
+	_add_lake_shoreline()
 	_add_box("WetlandEdge", Vector3(-78, 0.15, 42), Vector3(32, 0.3, 20), Color("5b876a"), false)
 	_add_slope("GentleSlope", Vector3(52, 1.8, -18), Vector3(34, 3, 42), -12.0, Color("789457"))
 	_add_boundaries()
@@ -77,6 +78,24 @@ func _add_forest() -> void:
 			random.randf_range(-104.0, -24.0),
 		)
 		add_child(tree)
+
+
+func _add_lake_shoreline() -> void:
+	var random := RandomNumberGenerator.new()
+	random.seed = FOREST_SEED + 1
+	for index in range(8):
+		var horizontal_position := -78.0 + index * 9.0
+		var vertical_position := 43.0 + index * 6.5
+		_add_shore_rock("LakeNorthRock%d" % index, Vector3(horizontal_position, 1.3, 41.0 + random.randf_range(-1.5, 1.5)), random)
+		_add_shore_rock("LakeSouthRock%d" % index, Vector3(horizontal_position, 1.3, 89.0 + random.randf_range(-1.5, 1.5)), random)
+		_add_shore_rock("LakeWestRock%d" % index, Vector3(-79.0 + random.randf_range(-1.5, 1.5), 1.3, vertical_position), random)
+		_add_shore_rock("LakeEastRock%d" % index, Vector3(-15.0 + random.randf_range(-1.5, 1.5), 1.3, vertical_position), random)
+
+
+func _add_shore_rock(label: String, position: Vector3, random: RandomNumberGenerator) -> void:
+	# Each rock overlaps its neighbors so there is no walkable gap around the lake.
+	var size := Vector3(random.randf_range(10.0, 12.0), random.randf_range(2.4, 4.0), random.randf_range(8.0, 10.0))
+	_add_box(label, position, size, ROCK_COLOR)
 
 
 func _add_slope(label: String, position: Vector3, size: Vector3, angle_degrees: float, color: Color) -> void:

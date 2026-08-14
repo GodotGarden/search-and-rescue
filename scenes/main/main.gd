@@ -15,6 +15,7 @@ func _ready() -> void:
 	session.host_ready.connect(_on_host_ready)
 	session.level_requested.connect(_on_level_requested)
 	session.player_spawn_requested.connect(_spawn_responder)
+	session.player_despawn_requested.connect(_despawn_responder)
 	session.status_changed.connect(_show_status)
 	session.session_ended.connect(_return_to_menu)
 	session.session_failed.connect(_return_to_menu)
@@ -39,9 +40,9 @@ func _on_host_ready() -> void:
 	session.set_active_level(LEVEL_PATH)
 
 
-func _on_level_requested(level_path: String) -> void:
+func _on_level_requested(level_path: String, epoch: int) -> void:
 	_load_level(level_path)
-	session.notify_client_level_loaded()
+	session.notify_client_level_loaded(epoch)
 
 
 func _load_level(level_path: String) -> void:
@@ -68,6 +69,17 @@ func _spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> v
 		responder.equipped_tool_changed.connect(hud.set_equipped_tool)
 		responder.tool_used.connect(hud.use_equipped_tool)
 		hud.set_equipped_tool(responder.get_equipped_tool())
+	_refresh_hud()
+
+
+func _despawn_responder(peer_id: int) -> void:
+	if active_world == null:
+		return
+	var responder := active_world.get_node_or_null("Players/Responder_%d" % peer_id)
+	if responder != null:
+		responder.queue_free()
+	if responder != null and responder.is_multiplayer_authority():
+		hud.set_local_responder(null)
 	_refresh_hud()
 
 

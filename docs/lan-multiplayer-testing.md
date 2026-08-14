@@ -38,6 +38,7 @@ Perform this sequence once per build that changes session, player, world, or sha
 | --- | --- | --- |
 | Connection | Host, then join with the correct LAN IP. | The client enters the same inland-island level. Neither instance stays on a connecting screen. |
 | Spawn roster | Stand still after the client joins. | Exactly two responders exist, at separate spawn markers. Rejoining or changing focus does not create another responder. |
+| Player limit | Attempt to join from a third instance after the two-player session is active. | The third instance is refused; the active session remains exactly one host and one client. |
 | Local ownership | Move, sprint, jump, and orbit the camera on each machine. | Each player controls only their own responder and camera. The other responder remains input-free locally. |
 | Names | Compare the labels above both responders. | Each machine shows both players' distinct chosen names. |
 | Replication | Have each player run from the rescue centre toward the trail destination, then stop and change direction. | The other instance sees responsive movement without a permanently frozen or duplicate responder. |
@@ -45,6 +46,7 @@ Perform this sequence once per build that changes session, player, world, or sha
 | Toolbelt controls | Press <kbd>1</kbd>, <kbd>2</kbd>, and <kbd>3</kbd>, then use <kbd>E</kbd>. | The matching hotbar slot highlights; binoculars zoom while <kbd>E</kbd> is held, while map and compass open on a press. |
 | Mouse control | Press <kbd>F1</kbd> while playing, then press it again. | The mouse releases and can be captured again without losing movement control. <kbd>Escape</kbd> closes an open map or compass. |
 | Host exit | Select **End session** on the host. | The host and client both return safely to the session menu; the client explains that the host disconnected. |
+| Lake boundary | Try to reach the lake island from every shore edge. | Continuous rocky shoreline collision prevents entry to the water and keeps the island inaccessible. |
 
 Record the commit, machine/OS pair, Godot version, and any failure in the playtest notes. Include whether the test was same-machine or LAN; a passing loopback test does not prove LAN connectivity.
 
