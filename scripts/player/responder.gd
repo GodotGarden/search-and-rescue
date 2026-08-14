@@ -21,12 +21,13 @@ var _network_position := Vector3.ZERO
 var _network_yaw := 0.0
 var _network_send_elapsed := 0.0
 var _binoculars_active := false
+var _display_name := "Responder"
 
 
 func _ready() -> void:
 	var is_local := is_multiplayer_authority()
 	camera.current = is_local
-	name_tag.text = "You" if is_local else "Responder"
+	_update_name_tag()
 	var material := body_mesh.material_override.duplicate() as StandardMaterial3D
 	material.albedo_color = Color(0.1, 0.45, 0.9) if is_local else Color(1.0, 0.35, 0.1)
 	body_mesh.material_override = material
@@ -40,6 +41,8 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_multiplayer_authority():
 		return
+	if not camera.is_current():
+		camera.make_current()
 	if event.is_action_pressed("toggle_mouse_capture"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 		return
@@ -82,6 +85,16 @@ func _physics_process(delta: float) -> void:
 
 func is_viewing_binoculars() -> bool:
 	return _binoculars_active
+
+
+func set_display_name(display_name: String) -> void:
+	_display_name = display_name
+	if is_node_ready():
+		_update_name_tag()
+
+
+func _update_name_tag() -> void:
+	name_tag.text = "%s (You)" % _display_name if is_multiplayer_authority() else _display_name
 
 
 func _set_binoculars_active(active: bool) -> void:

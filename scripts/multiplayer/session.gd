@@ -5,7 +5,7 @@ const MAX_PLAYERS := 2
 
 signal host_ready
 signal level_requested(level_path: String)
-signal player_spawn_requested(peer_id: int, spawn_index: int)
+signal player_spawn_requested(peer_id: int, spawn_index: int, display_name: String)
 signal status_changed(message: String)
 signal session_ended(message: String)
 signal session_failed(message: String)
@@ -13,6 +13,8 @@ signal session_failed(message: String)
 var _peer: ENetMultiplayerPeer
 var _active_level_path := ""
 var _spawned_peers: Dictionary = {}
+var _display_names: Dictionary = {}
+var _local_display_name := "Responder"
 var _status := "Disconnected"
 
 
@@ -31,6 +33,7 @@ func start_host() -> void:
 		_fail("Could not host on port %d (error %d)." % [DEFAULT_PORT, result])
 		return
 	multiplayer.multiplayer_peer = _peer
+	_display_names[1] = _local_display_name
 	_set_status("Hosting on LAN port %d." % DEFAULT_PORT)
 	host_ready.emit()
 
@@ -44,6 +47,11 @@ func start_join(address: String) -> void:
 		return
 	multiplayer.multiplayer_peer = _peer
 	_set_status("Connecting to %s:%d…" % [address, DEFAULT_PORT])
+
+
+func set_local_display_name(display_name: String) -> void:
+	var cleaned_name := display_name.strip_edges().left(18)
+	_local_display_name = cleaned_name if not cleaned_name.is_empty() else "Responder"
 
 
 func set_active_level(level_path: String) -> void:
@@ -89,6 +97,7 @@ func _on_peer_connected(peer_id: int) -> void:
 
 func _on_connected_to_server() -> void:
 	_set_status("Connected. Waiting for the host to load the level…")
+	register_display_name.rpc_id(1, _local_display_name)
 
 
 func _on_connection_failed() -> void:
@@ -112,7 +121,7 @@ func client_level_loaded() -> void:
 	if peer_id <= 1 or _spawned_peers.has(peer_id):
 		return
 	for existing_peer_id in _spawned_peers:
-		spawn_responder.rpc_id(peer_id, existing_peer_id, _spawned_peers[existing_peer_id])
+		spawn_responder.rpc_id(peer_id, existing_peer_id, _spawned_peers[existing_peer_id], _display_names.get(existing_peer_id, "Responder"))
 	_spawn_peer(peer_id, 1)
 	_set_status("Two responders are active.")
 
@@ -121,16 +130,29 @@ func _spawn_peer(peer_id: int, spawn_index: int) -> void:
 	if _spawned_peers.has(peer_id):
 		return
 	_spawned_peers[peer_id] = spawn_index
-	player_spawn_requested.emit(peer_id, spawn_index)
-	spawn_responder.rpc(peer_id, spawn_index)
+	var display_name: String = _display_names.get(peer_id, "Responder")
+	player_spawn_requested.emit(peer_id, spawn_index, display_name)
+	spawn_responder.rpc(peer_id, spawn_index, display_name)
 
 
 @rpc("authority", "call_remote", "reliable")
-func spawn_responder(peer_id: int, spawn_index: int) -> void:
+func spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> void:
 	if _spawned_peers.has(peer_id):
 		return
 	_spawned_peers[peer_id] = spawn_index
-	player_spawn_requested.emit(peer_id, spawn_index)
+	_display_names[peer_id] = display_name
+	player_spawn_requested.emit(peer_id, spawn_index, display_name)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func register_display_name(display_name: String) -> void:
+	if not multiplayer.is_server():
+		return
+	var peer_id := multiplayer.get_remote_sender_id()
+	if peer_id <= 1:
+		return
+	var cleaned_name := display_name.strip_edges().left(18)
+	_display_names[peer_id] = cleaned_name if not cleaned_name.is_empty() else "Responder"
 
 
 func _fail(message: String) -> void:
@@ -140,6 +162,7 @@ func _fail(message: String) -> void:
 
 func _end_peer() -> void:
 	_spawned_peers.clear()
+	_display_names.clear()
 	_active_level_path = ""
 	if multiplayer.multiplayer_peer != null:
 		multiplayer.multiplayer_peer.close()

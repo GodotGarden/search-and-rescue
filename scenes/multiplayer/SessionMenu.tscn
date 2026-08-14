@@ -31,6 +31,13 @@ horizontal_alignment = 1
 text = "Two-player LAN walking demo"
 horizontal_alignment = 1
 
+[node name="NameLabel" type="Label" parent="Panel/Margin/Content"]
+text = "Responder name"
+
+[node name="NameInput" type="LineEdit" parent="Panel/Margin/Content"]
+max_length = 18
+placeholder_text = "Responder"
+
 [node name="HostButton" type="Button" parent="Panel/Margin/Content"]
 custom_minimum_size = Vector2(0, 42)
 text = "Host LAN session"

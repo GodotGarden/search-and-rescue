@@ -24,11 +24,13 @@ func _ready() -> void:
 	_show_status("Choose Host to start a LAN session, or enter a host IP to join.")
 
 
-func _on_host_requested() -> void:
+func _on_host_requested(display_name: String) -> void:
+	session.set_local_display_name(display_name)
 	session.start_host()
 
 
-func _on_join_requested(address: String) -> void:
+func _on_join_requested(address: String, display_name: String) -> void:
+	session.set_local_display_name(display_name)
 	session.start_join(address)
 
 
@@ -52,12 +54,13 @@ func _load_level(level_path: String) -> void:
 	_refresh_hud()
 
 
-func _spawn_responder(peer_id: int, spawn_index: int) -> void:
+func _spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> void:
 	if active_world == null or active_world.get_node_or_null("Players/Responder_%d" % peer_id) != null:
 		return
 	var responder := RESPONDER_SCENE.instantiate()
 	responder.name = "Responder_%d" % peer_id
 	responder.set_multiplayer_authority(peer_id)
+	responder.set_display_name(display_name)
 	active_world.get_node("Players").add_child(responder)
 	responder.global_transform = active_world.get_spawn_transform(spawn_index)
 	if peer_id == multiplayer.get_unique_id():

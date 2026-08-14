@@ -25,10 +25,10 @@ Use the returned IPv4 address. Do not use an address beginning with `127.` (loop
 ## Start a session
 
 1. Open the project and run it with <kbd>F5</kbd> on the host machine.
-2. Select **Host LAN session**. The inland island loads and the HUD shows **Host**.
+2. Enter a distinct **Responder name**, then select **Host LAN session**. The inland island loads and the HUD shows **Host**.
 3. Find the host machine's LAN IP address, such as `192.168.1.42`; on macOS, follow the steps above.
-4. Run a second instance on the joining machine. Enter that IP address in **Host IP address**, then select **Join session**.
-5. Wait for the inland island to load on the client. Each machine should show two responders: the local responder is blue and the remote responder is orange.
+4. Run a second instance on the joining machine. Enter a different **Responder name** and the host IP address, then select **Join session**.
+5. Wait for the inland island to load on the client. Each machine should show two responders: the local responder is blue, the remote responder is orange, and each has the selected name above them.
 
 ## Core acceptance pass
 
@@ -39,6 +39,7 @@ Perform this sequence once per build that changes session, player, world, or sha
 | Connection | Host, then join with the correct LAN IP. | The client enters the same inland-island level. Neither instance stays on a connecting screen. |
 | Spawn roster | Stand still after the client joins. | Exactly two responders exist, at separate spawn markers. Rejoining or changing focus does not create another responder. |
 | Local ownership | Move, sprint, jump, and orbit the camera on each machine. | Each player controls only their own responder and camera. The other responder remains input-free locally. |
+| Names | Compare the labels above both responders. | Each machine shows its own name with “(You)” and the other player's chosen name. |
 | Replication | Have each player run from the rescue centre toward the trail destination, then stop and change direction. | The other instance sees responsive movement without a permanently frozen or duplicate responder. |
 | World consistency | Compare landmarks and objective text. | Both players see the same inland-island blockout and the objective “Reach the trail marker.” |
 | Mouse control | Press <kbd>Escape</kbd> while playing, then press it again. | The mouse releases and can be captured again without losing movement control. |
