@@ -18,6 +18,8 @@ var _locomotion: ProceduralLocomotion
 var _identity_material: StandardMaterial3D
 var _horizontal_velocity := Vector3.ZERO
 var _grounded := true
+var _silhouette_enabled := false
+var _silhouette_material: StandardMaterial3D
 
 
 func _ready() -> void:
@@ -41,6 +43,38 @@ func set_identity_color(color: Color) -> void:
 		_identity_material.albedo_color = color
 
 
+## Sets an exact, reproducible pose for preview/capture tooling — no delta-time integration.
+## gait_phase_normalized/idle_phase_normalized are 0..1 (fraction of a full gait/sway cycle).
+## See "Character animation contract" in docs/specifications/procedural-preview-lab.md.
+func set_exact_pose(gait_phase_normalized: float, speed: float, grounded: bool, idle_phase_normalized: float = 0.0) -> void:
+	if _locomotion != null:
+		_locomotion.set_exact_pose(gait_phase_normalized * TAU, speed, grounded, idle_phase_normalized * TAU)
+
+
+## Flat, unshaded, single-color materials on every mesh — for silhouette/proportion review.
+## Re-applied automatically if the rig is rebuilt (build()) while enabled.
+func set_silhouette_mode(enabled: bool) -> void:
+	_silhouette_enabled = enabled
+	_apply_silhouette_mode()
+
+
+## Combined AABB of every visible mesh, in this node's own local space (not world space) —
+## for preview camera fit-to-subject framing.
+func get_visual_aabb() -> AABB:
+	var combined := AABB()
+	var first := true
+	var world_to_local := global_transform.affine_inverse()
+	for mesh_instance in _find_mesh_instances(self):
+		var local_transform: Transform3D = world_to_local * mesh_instance.global_transform
+		var mesh_aabb: AABB = local_transform * mesh_instance.get_aabb()
+		if first:
+			combined = mesh_aabb
+			first = false
+		else:
+			combined = combined.merge(mesh_aabb)
+	return combined
+
+
 func get_head_socket() -> Node3D:
 	return _joints.get("HeadSocket")
 
@@ -62,6 +96,8 @@ func build(character_appearance: CharacterAppearance) -> void:
 	_identity_material = null
 	_build_rig(character_appearance)
 	_locomotion = ProceduralLocomotion.new(_joints, _rest_rotations)
+	if _silhouette_enabled:
+		_apply_silhouette_mode()
 
 
 func _build_rig(app: CharacterAppearance) -> void:
@@ -227,6 +263,34 @@ func _add_rescue_helmet(head: Node3D, head_size: float) -> void:
 	brim.position = Vector3(0, head_size * 0.94, 0)
 	brim.material_override = brim_material
 	head.add_child(brim)
+
+
+func _apply_silhouette_mode() -> void:
+	for mesh_instance in _find_mesh_instances(self):
+		if _silhouette_enabled:
+			if not mesh_instance.has_meta("_original_material"):
+				mesh_instance.set_meta("_original_material", mesh_instance.material_override)
+			mesh_instance.material_override = _get_silhouette_material()
+		elif mesh_instance.has_meta("_original_material"):
+			mesh_instance.material_override = mesh_instance.get_meta("_original_material")
+			mesh_instance.remove_meta("_original_material")
+
+
+func _get_silhouette_material() -> StandardMaterial3D:
+	if _silhouette_material == null:
+		_silhouette_material = StandardMaterial3D.new()
+		_silhouette_material.albedo_color = Color.BLACK
+		_silhouette_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	return _silhouette_material
+
+
+func _find_mesh_instances(node: Node) -> Array[MeshInstance3D]:
+	var result: Array[MeshInstance3D] = []
+	for child in node.get_children():
+		if child is MeshInstance3D:
+			result.append(child)
+		result.append_array(_find_mesh_instances(child))
+	return result
 
 
 func _add_pivot(parent: Node3D, joint_name: String, local_position: Vector3, rest_rotation: Vector3 = Vector3.ZERO) -> Node3D:
