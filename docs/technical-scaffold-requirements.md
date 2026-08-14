@@ -10,7 +10,7 @@ For gameplay scope and acceptance criteria, see the [Specification](../specifica
 
 ## Non-negotiable constraints
 
-- Standard **Godot 4.6**, GDScript only, desktop-first.
+- Standard **Godot 4.7**, GDScript only, desktop-first.
 - Forward+ is the intended renderer. Do not spend time supporting Web, mobile, or another renderer in this scaffold.
 - Use built-in Godot nodes and high-level multiplayer APIs. Do not install a terrain, networking, inventory, ECS, or mission-framework add-on for the first pass.
 - Two players only: one LAN host and one direct-IP joining client. No accounts, matchmaking, internet relay, dedicated server, reconnect, or host migration.
@@ -153,7 +153,7 @@ Make a small, separately reviewable change or commit after every checkpoint.
 
 ## Definition of done for this scaffold
 
-- [ ] Project opens in standard Godot 4.6 and runs `Main.tscn` using Forward+.
+- [ ] Project opens in standard Godot 4.7 and runs `Main.tscn` using Forward+.
 - [ ] A player can host on the LAN; another machine can join by IP and port.
 - [ ] Both players load the inland-island test level and spawn once at distinct spawn markers.
 - [ ] Both can walk, sprint, jump, and use a collision-safe third-person camera.

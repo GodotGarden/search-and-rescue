@@ -4,7 +4,7 @@
 
 Use Godot scenes, node composition, resources, and GDScript as the default architecture. Add an abstraction only after two real uses make the duplication or coupling painful.
 
-The project uses the standard Godot 4.6 editor and GDScript.
+The project uses the standard Godot 4.7 editor and GDScript.
 
 ## Simple scene composition
 

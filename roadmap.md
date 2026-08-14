@@ -4,7 +4,7 @@ The roadmap is ordered by learning value. Finish and play each milestone before 
 
 ## M0 — Project foundation
 
-**Goal:** Open a clean, GDScript-only Godot 4.6 project and establish the smallest reusable structure.
+**Goal:** Open a clean, GDScript-only Godot 4.7 project and establish the smallest reusable structure.
 
 - Add the directory scaffold and documentation.
 - Set basic input actions and project display settings.

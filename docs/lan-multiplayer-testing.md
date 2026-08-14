@@ -5,7 +5,7 @@ Use this guide to verify the current walking-demo scaffold with one host and one
 ## Before starting
 
 - Use two separate Godot desktop instances. Two physical machines on the same LAN are the required test; two instances on one machine are a useful smoke test.
-- Use the same commit and Godot 4.6 project on both machines.
+- Use the same commit and Godot 4.7 project on both machines.
 - Ensure the joining machine can reach the host's LAN IP address.
 - Allow inbound UDP traffic on port `8910` on the host machine if its firewall asks. The port is defined as `DEFAULT_PORT` in `scripts/multiplayer/session.gd`.
 - For a same-machine check, use `127.0.0.1` as the joining address. Do not treat this as a substitute for a LAN test.

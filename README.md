@@ -2,7 +2,7 @@
 
 A low-poly, third-person 3D co-op search-and-rescue game set across bounded island regions. The first goal is a small but convincing two-player rescue loop: receive an incident, travel and search outdoors, locate a casualty or hazard, resolve it, and return to complete the call together.
 
-This is a **Godot 4.6, GDScript-only** project. C# can be added later if a concrete need emerges.
+This is a **Godot 4.7, GDScript-only** project. C# can be added later if a concrete need emerges.
 
 ## Prototype focus
 
