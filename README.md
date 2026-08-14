@@ -26,6 +26,8 @@ See [specification.md](specification.md) for the product scope and [roadmap.md](
 
 Use Forward+ in Project Settings for the intended desktop look. Develop and test on machines with current graphics hardware that supports Godot's RenderingDevice-based renderers.
 
+The game opens maximized and is HiDPI-aware on macOS. Its 1280×720 logical viewport uses Godot's `canvas_items` stretch mode, so the UI and scene scale with the available display size.
+
 ## Current scaffold demo
 
 The current main scene is a two-player LAN third-person walking demo. On the first machine, select **Host LAN session**. On the second machine, enter the host machine's LAN IP address and select **Join session**. Both machines use UDP port `8910`; allow it through the host firewall if needed.
