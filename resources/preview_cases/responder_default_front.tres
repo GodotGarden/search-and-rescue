@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="PreviewCase" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/preview_case.gd" id="1_case"]
+
+[resource]
+script = ExtResource("1_case")
+case_name = "responder_default_front"
+appearance_path = "res://resources/character/appearance_standard_responder.tres"
+stage_preset = 0
+camera_view = 0
+pose_phase = 0.0
+pose_speed = 0.0
+pose_grounded = true
+output_path = ""

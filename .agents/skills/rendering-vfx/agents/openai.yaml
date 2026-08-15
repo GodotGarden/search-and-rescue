@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rendering & VFX"
+  short_description: "Build scalable Forward+ visuals and effects"
+  default_prompt: "Use $rendering-vfx to implement this rendering or VFX task."

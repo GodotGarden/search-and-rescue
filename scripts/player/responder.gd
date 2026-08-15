@@ -1,25 +1,35 @@
 extends CharacterBody3D
 
+const CharacterModel := preload("res://scripts/character/character_builder.gd")
+const CharacterAppearance := preload("res://scripts/character/character_appearance.gd")
+
 @export var walk_speed := 5.0
 @export var sprint_speed := 8.0
 @export var acceleration := 18.0
 @export var jump_velocity := 5.0
+## Gravity scale while rising (button-held ascent). 1.0 keeps the vanilla arc on the way up.
+@export var rise_gravity_multiplier := 1.0
+## Gravity scale while falling. Higher than rise_gravity_multiplier so the descent reads as a
+## snappy drop rather than a slow, symmetric hang at the top of the arc ("floaty" jump feel).
+@export var fall_gravity_multiplier := 2.5
 @export var mouse_sensitivity := 0.0025
 
 const GRAVITY := 18.0
 const CAMERA_PITCH_LIMIT := deg_to_rad(65.0)
 const NETWORK_SEND_INTERVAL := 1.0 / 15.0
+const LOCAL_IDENTITY_COLOR := Color(0.1, 0.45, 0.9)
+const REMOTE_IDENTITY_COLOR := Color(1.0, 0.35, 0.1)
+const REMOTE_GROUNDED_VELOCITY_THRESHOLD := 1.0 # No move_and_slide() runs for remote bodies, so is_on_floor() never updates for them; approximate from replicated vertical velocity instead.
 
 enum Tool { BINOCULARS, MAP, COMPASS }
 
 signal equipped_tool_changed(tool: Tool)
 signal tool_used(tool: Tool)
 
-@onready var body_mesh: MeshInstance3D = $BodyMesh
+@onready var character_model: CharacterModel = $CharacterModel
 @onready var name_tag: Label3D = $NameTag
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
-@onready var magnetic_compass: Node3D = $Toolbelt/MagneticCompass
 
 var _look_pitch := -0.2
 var _network_position := Vector3.ZERO
@@ -34,14 +44,29 @@ func _ready() -> void:
 	var is_local := is_multiplayer_authority()
 	camera.current = is_local
 	_update_name_tag()
-	var material := body_mesh.material_override.duplicate() as StandardMaterial3D
-	material.albedo_color = Color(0.1, 0.45, 0.9) if is_local else Color(1.0, 0.35, 0.1)
-	body_mesh.material_override = material
+	character_model.set_identity_color(LOCAL_IDENTITY_COLOR if is_local else REMOTE_IDENTITY_COLOR)
+	_attach_sockets()
 	if is_local:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	else:
 		_network_position = global_position
 		_network_yaw = rotation.y
+
+
+## Called by the spawner before this node enters the tree, so CharacterModel's own _ready() builds
+## the received shape directly instead of a default followed by an immediate rebuild.
+func set_appearance_payload(payload: Dictionary) -> void:
+	var model := $CharacterModel as CharacterModel
+	model.appearance = CharacterAppearance.from_payload(payload)
+
+
+func _attach_sockets() -> void:
+	var head_socket := character_model.get_head_socket()
+	remove_child(name_tag)
+	head_socket.add_child(name_tag)
+	name_tag.position = Vector3(0, 0.15, 0)
+
+	camera_pivot.position.y = head_socket.global_transform.origin.y - global_transform.origin.y
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -59,15 +84,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Counter-rotate the belt compass so its needle remains aligned with world north.
-	magnetic_compass.rotation.y = -global_rotation.y
 	if not is_multiplayer_authority():
 		global_position = global_position.lerp(_network_position, minf(delta * 12.0, 1.0))
 		rotation.y = lerp_angle(rotation.y, _network_yaw, minf(delta * 12.0, 1.0))
+		character_model.set_locomotion_input(Vector3(velocity.x, 0.0, velocity.z), absf(velocity.y) < REMOTE_GROUNDED_VELOCITY_THRESHOLD)
 		return
 	camera.fov = move_toward(camera.fov, 28.0 if _binoculars_active else 70.0, delta * 160.0)
 	if not is_on_floor():
-		velocity.y -= GRAVITY * delta
+		# Asymmetric gravity: falling faster than rising tightens the arc (less hang time at the
+		# apex) without changing jump height, which is what reads as "floaty" versus "snappy".
+		var gravity_scale := fall_gravity_multiplier if velocity.y < 0.0 else rise_gravity_multiplier
+		velocity.y -= GRAVITY * gravity_scale * delta
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
 
@@ -77,6 +104,7 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, move_direction.x * speed, acceleration * delta)
 	velocity.z = move_toward(velocity.z, move_direction.z * speed, acceleration * delta)
 	move_and_slide()
+	character_model.set_locomotion_input(Vector3(velocity.x, 0.0, velocity.z), is_on_floor())
 	_network_send_elapsed += delta
 	if _network_send_elapsed >= NETWORK_SEND_INTERVAL:
 		_network_send_elapsed = 0.0
@@ -119,8 +147,7 @@ func _update_name_tag() -> void:
 func _set_binoculars_active(active: bool) -> void:
 	_binoculars_active = active
 	# Only the owning player hides their own responder; the remote peer still sees it.
-	body_mesh.visible = not active
-	$Toolbelt.visible = not active
+	character_model.visible = not active
 	name_tag.visible = not active
 
 

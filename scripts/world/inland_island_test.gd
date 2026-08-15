@@ -1,12 +1,15 @@
 extends Node3D
 
 const ProceduralTree := preload("res://scripts/world/procedural_tree.gd")
+const ProceduralRock := preload("res://scripts/world/procedural_rock.gd")
 
 const GROUND_COLOR := Color("668a4e")
 const TRAIL_COLOR := Color("b99c6b")
 const ROCK_COLOR := Color("56636a")
 const WATER_COLOR := Color("3b7fa5")
 const FOREST_SEED := 904201
+const FOREST_ROCK_SEED := 904501
+const FOREST_ROCK_COUNT := 20
 
 
 func _ready() -> void:
@@ -36,6 +39,7 @@ func _build_blockout() -> void:
 	_add_slope("GentleSlope", Vector3(52, 1.8, -18), Vector3(34, 3, 42), -12.0, Color("789457"))
 	_add_boundaries()
 	_add_forest()
+	_add_forest_rocks()
 	_add_label("TRAILHEAD", Vector3(2, 4, 21))
 	_add_label("LOOKOUT", Vector3(67, 11, -30))
 	_add_label("TRAIL DESTINATION", $TrailDestination.position + Vector3(0, 2, 0))
@@ -80,6 +84,24 @@ func _add_forest() -> void:
 			random.randf_range(-104.0, -24.0),
 		)
 		add_child(tree)
+
+
+func _add_forest_rocks() -> void:
+	# Same forest footprint as _add_forest(); scattered independently at a
+	# lower, forest-edge instance count so the ground doesn't read as bare
+	# between the trees. Kept as individual nodes (not MultiMesh) to match
+	# the existing shore-rock convention at this count; revisit if forest
+	# rock density grows toward ground-cover levels.
+	var random := RandomNumberGenerator.new()
+	random.seed = FOREST_ROCK_SEED
+	for index in range(FOREST_ROCK_COUNT):
+		var rock := ProceduralRock.create(FOREST_ROCK_SEED + index)
+		rock.position = Vector3(
+			random.randf_range(35.0, 112.0),
+			0.0,
+			random.randf_range(-104.0, -24.0),
+		)
+		add_child(rock)
 
 
 func _add_lake_shoreline() -> void:

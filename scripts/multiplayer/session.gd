@@ -1,11 +1,18 @@
 extends Node
 
+const CharacterAppearance := preload("res://scripts/character/character_appearance.gd")
+
 const DEFAULT_PORT := 8910
 const MAX_CLIENTS := 1
+## Host-assigned per spawn_index; MVP has no player-facing appearance customization (see procedural-character-spec.md).
+const APPEARANCE_PRESET_PATHS := [
+	"res://resources/character/appearance_standard_responder.tres",
+	"res://resources/character/appearance_tall_guide.tres",
+]
 
 signal host_ready
 signal level_requested(level_path: String, epoch: int)
-signal player_spawn_requested(peer_id: int, spawn_index: int, display_name: String)
+signal player_spawn_requested(peer_id: int, spawn_index: int, display_name: String, appearance_payload: Dictionary)
 signal player_despawn_requested(peer_id: int)
 signal status_changed(message: String)
 signal session_ended(message: String)
@@ -16,6 +23,7 @@ var _active_level_path := ""
 var _level_epoch := 0
 var _spawned_peers: Dictionary = {}
 var _display_names: Dictionary = {}
+var _appearance_payloads: Dictionary = {}
 var _local_display_name := "Responder"
 var _status := "Disconnected"
 
@@ -141,7 +149,7 @@ func client_level_loaded(epoch: int) -> void:
 	if peer_id <= 1 or _spawned_peers.has(peer_id):
 		return
 	for existing_peer_id in _spawned_peers:
-		spawn_responder.rpc_id(peer_id, existing_peer_id, _spawned_peers[existing_peer_id], _display_names.get(existing_peer_id, "Responder"))
+		spawn_responder.rpc_id(peer_id, existing_peer_id, _spawned_peers[existing_peer_id], _display_names.get(existing_peer_id, "Responder"), _appearance_payloads.get(existing_peer_id, {}))
 	_spawn_peer(peer_id, 1)
 	_set_status("Two responders are active.")
 
@@ -151,17 +159,27 @@ func _spawn_peer(peer_id: int, spawn_index: int) -> void:
 		return
 	_spawned_peers[peer_id] = spawn_index
 	var display_name: String = _display_names.get(peer_id, "Responder")
-	player_spawn_requested.emit(peer_id, spawn_index, display_name)
-	spawn_responder.rpc(peer_id, spawn_index, display_name)
+	var appearance_payload := _build_appearance_payload(spawn_index)
+	_appearance_payloads[peer_id] = appearance_payload
+	player_spawn_requested.emit(peer_id, spawn_index, display_name, appearance_payload)
+	spawn_responder.rpc(peer_id, spawn_index, display_name, appearance_payload)
+
+
+func _build_appearance_payload(spawn_index: int) -> Dictionary:
+	var preset_path: String = APPEARANCE_PRESET_PATHS[spawn_index % APPEARANCE_PRESET_PATHS.size()]
+	var appearance := (load(preset_path) as CharacterAppearance).duplicate() as CharacterAppearance
+	appearance.variant_seed = spawn_index
+	return appearance.to_payload()
 
 
 @rpc("authority", "call_remote", "reliable")
-func spawn_responder(peer_id: int, spawn_index: int, display_name: String) -> void:
+func spawn_responder(peer_id: int, spawn_index: int, display_name: String, appearance_payload: Dictionary) -> void:
 	if _spawned_peers.has(peer_id):
 		return
 	_spawned_peers[peer_id] = spawn_index
 	_display_names[peer_id] = display_name
-	player_spawn_requested.emit(peer_id, spawn_index, display_name)
+	_appearance_payloads[peer_id] = appearance_payload
+	player_spawn_requested.emit(peer_id, spawn_index, display_name, appearance_payload)
 
 
 func _despawn_peer(peer_id: int) -> void:
@@ -169,6 +187,7 @@ func _despawn_peer(peer_id: int) -> void:
 		return
 	_spawned_peers.erase(peer_id)
 	_display_names.erase(peer_id)
+	_appearance_payloads.erase(peer_id)
 	player_despawn_requested.emit(peer_id)
 	despawn_responder.rpc(peer_id)
 
@@ -177,6 +196,7 @@ func _despawn_peer(peer_id: int) -> void:
 func despawn_responder(peer_id: int) -> void:
 	_spawned_peers.erase(peer_id)
 	_display_names.erase(peer_id)
+	_appearance_payloads.erase(peer_id)
 	player_despawn_requested.emit(peer_id)
 
 
@@ -199,6 +219,7 @@ func _fail(message: String) -> void:
 func _end_peer() -> void:
 	_reset_roster()
 	_display_names.clear()
+	_appearance_payloads.clear()
 	_active_level_path = ""
 	_level_epoch = 0
 	if multiplayer.multiplayer_peer != null:

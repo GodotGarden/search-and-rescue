@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3 uid="uid://dq0m3ycqxklgn"]
+
+[ext_resource type="Script" path="res://scripts/vfx/landing_dust.gd" id="1_landing_dust"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dust"]
+transparency = 1
+albedo_color = Color(1, 1, 1, 1)
+vertex_color_use_as_albedo = true
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_dust"]
+material = SubResource("StandardMaterial3D_dust")
+size = Vector3(0.12, 0.09, 0.12)
+
+[sub_resource type="Gradient" id="Gradient_dust"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0.62, 0.54, 0.4, 0.85, 0.62, 0.54, 0.4, 0.55, 0.62, 0.54, 0.4, 0)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_dust"]
+gradient = SubResource("Gradient_dust")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_dust"]
+emission_shape = 1
+emission_sphere_radius = 0.2
+direction = Vector3(0, 1, 0)
+spread = 65.0
+initial_velocity_min = 0.6
+initial_velocity_max = 2.0
+gravity = Vector3(0, -3.5, 0)
+damping_min = 2.5
+damping_max = 4.5
+scale_min = 0.6
+scale_max = 1.5
+color_ramp = SubResource("GradientTexture1D_dust")
+
+[node name="LandingDust" type="Node3D"]
+script = ExtResource("1_landing_dust")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="."]
+cast_shadow = 0
+emitting = false
+amount = 18
+lifetime = 0.55
+one_shot = true
+explosiveness = 0.85
+randomness = 0.35
+fixed_fps = 30
+local_coords = false
+process_material = SubResource("ParticleProcessMaterial_dust")
+draw_pass_1 = SubResource("BoxMesh_dust")

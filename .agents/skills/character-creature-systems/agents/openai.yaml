@@ -1,0 +1,4 @@
+interface:
+  display_name: "Character & Creature Systems"
+  short_description: "Build procedural characters and creatures"
+  default_prompt: "Use $character-creature-systems to implement this procedural character task."
