@@ -7,6 +7,11 @@ const CharacterAppearance := preload("res://scripts/character/character_appearan
 @export var sprint_speed := 8.0
 @export var acceleration := 18.0
 @export var jump_velocity := 5.0
+## Gravity scale while rising (button-held ascent). 1.0 keeps the vanilla arc on the way up.
+@export var rise_gravity_multiplier := 1.0
+## Gravity scale while falling. Higher than rise_gravity_multiplier so the descent reads as a
+## snappy drop rather than a slow, symmetric hang at the top of the arc ("floaty" jump feel).
+@export var fall_gravity_multiplier := 2.5
 @export var mouse_sensitivity := 0.0025
 
 const GRAVITY := 18.0
@@ -86,7 +91,10 @@ func _physics_process(delta: float) -> void:
 		return
 	camera.fov = move_toward(camera.fov, 28.0 if _binoculars_active else 70.0, delta * 160.0)
 	if not is_on_floor():
-		velocity.y -= GRAVITY * delta
+		# Asymmetric gravity: falling faster than rising tightens the arc (less hang time at the
+		# apex) without changing jump height, which is what reads as "floaty" versus "snappy".
+		var gravity_scale := fall_gravity_multiplier if velocity.y < 0.0 else rise_gravity_multiplier
+		velocity.y -= GRAVITY * gravity_scale * delta
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = jump_velocity
 
