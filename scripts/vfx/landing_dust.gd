@@ -14,8 +14,8 @@ extends Node3D
 ##
 ## Instance this scene as a direct child of a CharacterBody3D, positioned at ground/foot level.
 
-@export var fall_speed_threshold := 3.0 # m/s downward speed required before a touchdown counts as a "landing".
-@export var landed_speed_threshold := 0.75 # m/s vertical speed still considered "settled" once grounded.
+@export_range(0.0, 100.0, 0.01, "or_greater") var fall_speed_threshold := 3.0 # m/s downward speed required before a touchdown counts as a "landing".
+@export_range(0.0, 100.0, 0.01, "or_greater") var landed_speed_threshold := 0.75 # m/s vertical speed still considered "settled" once grounded.
 
 @onready var _particles: GPUParticles3D = $GPUParticles3D
 
