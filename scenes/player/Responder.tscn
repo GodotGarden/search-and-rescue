@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/player/responder.gd" id="1_responder"]
 [ext_resource type="PackedScene" path="res://scenes/character/CharacterModel.tscn" id="2_character_model"]
+[ext_resource type="PackedScene" path="res://scenes/vfx/LandingDust.tscn" id="3_landing_dust"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_responder"]
 radius = 0.4
@@ -15,6 +16,8 @@ position = Vector3(0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_responder")
 
 [node name="CharacterModel" parent="." instance=ExtResource("2_character_model")]
+
+[node name="LandingDust" parent="." instance=ExtResource("3_landing_dust")]
 
 [node name="NameTag" type="Label3D" parent="."]
 position = Vector3(0, 2.05, 0)
